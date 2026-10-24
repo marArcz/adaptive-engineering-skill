@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "repositories": [
+    {
+      "id": "bulletproof-react",
+      "url": "https://github.com/alan2207/bulletproof-react",
+      "description": "Opinionated feature-oriented React application architecture reference",
+      "tags": ["react", "typescript", "architecture", "feature-folders"],
+      "use_for": ["feature-based architecture", "separating application concerns"],
+      "status": "candidate",
+      "reviewed_commit": null,
+      "verified_at": null,
+      "important_paths": [],
+      "limitations": ["Opinionated example; verify current APIs and compatibility", "Do not copy architecture wholesale"]
+    },
+    {
+      "id": "laravel-app-skeleton",
+      "url": "https://github.com/laravel/laravel",
+      "description": "Official Laravel application skeleton (not a feature-rich example app)",
+      "tags": ["laravel", "php", "project-structure", "skeleton"],
+      "use_for": ["default Laravel skeleton conventions", "project files and bootstrap organization"],
+      "status": "candidate",
+      "reviewed_commit": null,
+      "verified_at": null,
+      "important_paths": [],
+      "limitations": ["Skeleton rather than complete real-world application", "Check the project's installed Laravel version"]
+    }
+  ]
+}

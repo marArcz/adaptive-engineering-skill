@@ -1,0 +1,14 @@
+# Obsidian per-device workspace state
+.obsidian/workspace.json
+.obsidian/workspaces.json
+.obsidian/cache/
+.trash/
+.DS_Store
+Thumbs.db
+# Secrets and local environments
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+__pycache__/
