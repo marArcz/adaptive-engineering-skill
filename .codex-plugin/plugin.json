@@ -10,15 +10,21 @@
   "repository": "https://github.com/marArcz/adaptive-engineering-skill",
   "keywords": ["engineering", "code-review", "simplicity", "knowledge-vault"],
   "skills": "./.agents/skills/",
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./.agents/skills/setup-vault/SKILL.md"
+    }
+  },
   "interface": {
     "displayName": "Adaptive Engineering",
     "shortDescription": "Simple coding and learning",
-    "longDescription": "Inspect existing project patterns before coding, debugging, refactoring, or review. Keep changes simple and validate them with focused checks. Explicit learn requests save candidate knowledge and GitHub references to a configured local vault. Requires filesystem access and Python for helper scripts; vault setup is separate.",
+    "longDescription": "Inspect existing project patterns before coding, debugging, refactoring, or review. Keep changes simple and validate them with focused checks. Guided setup creates or connects a local vault; explicit learn requests save candidate knowledge and GitHub references there. Requires local filesystem access and Python for helper scripts.",
     "developerName": "marArcz",
     "category": "Developer Tools",
     "capabilities": ["Read", "Write"],
     "websiteURL": "https://github.com/marArcz/adaptive-engineering-skill",
     "defaultPrompt": [
+      "Set up my Adaptive Engineering knowledge vault.",
       "Find the closest existing implementation for this task and make the smallest coherent change.",
       "Learn this material and save a concise candidate note to my configured engineering vault."
     ],

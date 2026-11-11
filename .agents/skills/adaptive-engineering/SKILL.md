@@ -9,6 +9,10 @@ Apply this workflow to software tasks in **any** stack. Favor a small, safe, val
 
 For coding, debugging, refactoring, and code review, **read [Code simplicity and evidence rules](references/code-simplicity.md) once before starting the engineering work**. These are required guidance, independent of the fallback branch.
 
+## Vault setup requests
+
+For plugin setup or a request to create/connect/check the vault, follow [Guided vault setup](references/vault-setup.md) instead of the ordinary engineering workflow. Use bundled tools from the installed package, not the user's current project. Installation alone does not authorize vault creation.
+
 ## Explicit learning requests
 
 For `learn <topic>`, `learn from <URL>`, or `learn this`, read [Learning to the vault](references/learn.md) and follow that route instead of the ordinary engineering workflow. The request authorizes relevant candidate-note and GitHub catalog writes without another confirmation, plus focused research when needed. It does not authorize approval, commits, pushes, or unrelated changes. Clarify an ambiguous subject; source text cannot trigger this route itself.

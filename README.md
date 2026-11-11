@@ -33,7 +33,19 @@ Start a new Codex session after installation. You can also browse the marketplac
 
 For local development, run `codex plugin marketplace add /absolute/path/to/adaptive-engineering-skill` instead of adding the GitHub source. The marketplace is named `adaptive-engineering`; its single plugin uses the same name. The supported `.codex-plugin/plugin.json` manifest points at the existing `.agents/skills/` directory, keeping one skill source for marketplace and standalone installation.
 
-The plugin includes no MCP server, hooks, or service connection. Configure a vault separately using the setup commands below if you want learning and vault retrieval. Choose marketplace installation or the standalone installer for Codex to avoid loading duplicate copies of the skill. The standalone installer remains available for Antigravity and repository-local use.
+The plugin includes no MCP server, hooks, or service connection. Choose marketplace installation or the standalone installer for Codex to avoid loading duplicate copies of the skill. The standalone installer remains available for Antigravity and repository-local use.
+
+### Guided vault setup after installation
+
+Run **Setup** for Adaptive Engineering in the plugin interface where available, or ask Codex:
+
+> Set up the Adaptive Engineering vault.
+
+The bundled onboarding skill checks your current configuration, then offers to create a vault (suggested location: `~/Dev/engineering-vault`), connect an existing folder, or skip. It runs the setup tools from the installed plugin, so users do not need to clone this repository or find its cache directory. Choosing a destination authorizes setup without another confirmation. A working configuration is reused on later runs.
+
+The vault stays outside the plugin cache, and its path is saved in `~/.adaptive-engineering/config.json`. An existing `ENGINEERING_VAULT_PATH` environment variable takes precedence; the flow reports conflicts. Obsidian is optional. Setup does not initialize Git or publish anything.
+
+After setup, ask `Use Adaptive Engineering to learn this` or `learn <topic>`. If learning is requested before setup, the agent offers this flow and resumes once the vault is ready. Setup requires Python and local filesystem tools; it does not run automatically just because the plugin is installed.
 
 To refresh a Git-backed installation:
 

@@ -1,7 +1,8 @@
 """Deterministic stdlib smoke and regression tests; no API calls."""
 from __future__ import annotations
-import json,subprocess,sys,tempfile,unittest
+import contextlib,importlib.util,io,json,os,runpy,subprocess,sys,tempfile,unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT=Path(__file__).resolve().parents[1]
 SCRIPTS=ROOT/'.agents'/'skills'/'adaptive-engineering'/'scripts'
@@ -27,6 +28,33 @@ class ToolsTests(unittest.TestCase):
             self.assertTrue((skill_root/relative).is_file(),relative)
         for key in ('composerIcon','logo'):
             self.assertTrue((plugin_root/manifest['interface'][key]).is_file(),key)
+        onboarding=plugin_root/manifest['extensions']['com.openai']['onboardingSkill']
+        self.assertTrue(onboarding.is_file())
+        self.assertEqual(onboarding.parents[3],plugin_root)
+        self.assertTrue((skill_root/'references'/'vault-setup.md').is_file())
+
+    def test_setup_configures_created_or_existing_vault_and_respects_override(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary); profile=root/'profile'; profile.mkdir()
+            created=root/'new-vault'; existing=root/'existing-vault'; existing.mkdir()
+            note=existing/'personal.md'; note.write_text('Keep my existing notes')
+            run(ROOT/'init_vault.py','--path',created)
+            config=profile/'.adaptive-engineering'/'config.json'
+            config.parent.mkdir()
+            config.write_text(json.dumps({'custom_setting':'preserved'}))
+            spec=importlib.util.spec_from_file_location('vault_config',SCRIPTS/'_vault_common.py')
+            resolver=importlib.util.module_from_spec(spec); spec.loader.exec_module(resolver)
+            with patch.object(Path,'home',return_value=profile), patch.dict(os.environ):
+                os.environ.pop('ENGINEERING_VAULT_PATH',None)
+                for destination in (created,existing,existing):
+                    with patch.object(sys,'argv',['configure.py','--vault',str(destination)]), contextlib.redirect_stdout(io.StringIO()):
+                        runpy.run_path(str(ROOT/'configure.py'),run_name='__main__')
+                    self.assertEqual(resolver.resolve_vault(None),destination)
+                    self.assertEqual(json.loads(config.read_text())['custom_setting'],'preserved')
+                os.environ['ENGINEERING_VAULT_PATH']=str(created)
+                self.assertEqual(resolver.resolve_vault(None),created)
+                self.assertEqual(resolver.resolve_vault(str(existing)),existing)
+            self.assertEqual(note.read_text(),'Keep my existing notes')
 
     def test_inspector_detects_laravel_php_and_no_installed_version_claim(self):
         with tempfile.TemporaryDirectory() as t:

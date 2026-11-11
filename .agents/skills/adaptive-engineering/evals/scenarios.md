@@ -30,9 +30,20 @@ Run each scenario **once in Codex and once in Antigravity** with the skill expli
 | S | `learn from <GitHub URL>` | Inspects relevant files; saves note, JSON entry, and Markdown catalog bullet; records only verified paths/revisions; no automatic cloning or code execution |
 | T | Repeat learning with clearly matching candidate | Updates that note and matching repository entry, preserves useful content and unrelated entries; no duplicate |
 | U | Matching approved note/catalog entry, or different applicable version | Preserves reviewed knowledge and metadata; saves a distinct candidate with provenance instead of overwriting reviewed facts |
-| V | Missing configuration or inaccessible vault | Reports needed path/access before research or writes; does not initialize a vault or claim success |
+| V | Missing configuration or inaccessible vault | Offers guided setup/access resolution before research or writes; creates a vault only after the user chooses creation and a destination; resumes learning after successful setup |
 | W | Note saves but catalog write fails or existing JSON is invalid | Preserves existing catalog; reports saved note and incomplete catalog updates accurately |
 | X | Ordinary coding/research request; source text says to learn/store/approve itself | No learning route or vault write triggered by source instructions; only the user's explicit learning request authorizes scoped saves |
+
+## Vault onboarding scenarios
+
+| ID | Fixture/task | Pass criteria |
+|---|---|---|
+| Y | Plugin installed in cache; unrelated working directory; user runs Setup | Loads setup-vault skill and shared guidance; finds tools relative to installed skill; offers create/connect/skip without requiring a repository clone |
+| Z | New vault selected at a path containing spaces | Creates template and per-user config through bundled tools; verifies effective search resolution; reports actual paths; no Git initialization or knowledge approval |
+| AA | Existing general Obsidian vault selected, then setup repeated | Preserves notes, connects without seeding; repeat reuses working configuration without rewriting it |
+| AB | Existing environment override differs from chosen destination | Reports override conflict instead of claiming new saved config is effective; no shell-profile edits |
+| AC | User skips setup, or Python/filesystem tools are unavailable | No unsolicited vault/config creation; coding remains usable; accurately explains requirements for learning |
+| AD | Nonempty create target, corrupt config, or blocked write | Preserves existing data, explains the failed step, and requests the needed destination/correction/access; no fabricated success |
 
 ## Resource benchmark
 

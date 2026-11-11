@@ -6,7 +6,7 @@ Use this route when the user asks you to learn and retain a topic or supplied ma
 
 - The request authorizes relevant candidate notes, GitHub catalog updates, and focused research without another confirmation. It does not authorize approval, commits, pushes, or unrelated vault changes.
 - Resolve the existing vault through an explicit path (`--vault` for existing helpers), `ENGINEERING_VAULT_PATH`, or `~/.adaptive-engineering/config.json`, in that order. Do not guess a path or search the home directory.
-- Check that the vault exists and is accessible before research or writes. If missing, unconfigured, or inaccessible, report the problem and request the path or access needed. Do not initialize a vault or claim a save succeeded.
+- Check that the vault exists and is accessible before research or writes. If missing, unconfigured, or inaccessible, offer [Guided vault setup](vault-setup.md) and resume learning after the user chooses a destination and setup succeeds. Do not silently initialize a vault or claim a save succeeded.
 
 ## Gather evidence
 
