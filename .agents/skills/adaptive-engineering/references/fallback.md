@@ -15,4 +15,4 @@ Project-specific instructions prevail over generic vault preferences unless demo
 
 ### Research notes
 
-After finishing, optionally suggest a compact new vault note with evidence, versions, useful paths, risks, and `status: candidate`. **Do not write to the vault without explicit permission.**
+After finishing, optionally suggest a compact new vault note with evidence, versions, useful paths, risks, and `status: candidate`. **Do not write to the vault without explicit permission.** A request to learn and save findings supplies scoped permission: follow [Learning to the vault](learn.md). A research request alone does not authorize writes.

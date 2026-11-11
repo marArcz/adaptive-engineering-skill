@@ -2,6 +2,8 @@
 
 Open this folder as an Obsidian vault (Open folder as vault). Your notes are normal Markdown files and the Git repository is independent from each codebase.
 
+Explicit `learn` requests save concise candidate notes under `research/candidates/`; those notes are searchable but remain unapproved. Learning a topic without supplied material permits focused research. Learning from GitHub also updates its JSON catalog and Markdown overview. Ordinary engineering does not write here automatically, and learning does not authorize commits or pushes.
+
 Optional Git setup:
 
 ```bash

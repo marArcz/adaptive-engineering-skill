@@ -1,6 +1,6 @@
 # Knowledge index
 
-Use this index for manual navigation. Agents should query only on fallback instead of reading all vault files.
+Use this index for manual navigation. Agents should query on fallback or an explicit learning request instead of reading all vault files.
 
 ## Standards and patterns
 
@@ -17,4 +17,4 @@ Add folders as technologies actually become useful: `knowledge/technologies/lara
 
 ## Research
 
-- `research/candidates/` — unreviewed notes for human approval
+- `research/candidates/` — searchable learned/research notes, marked candidate until human approval; other research directories remain excluded from search

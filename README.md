@@ -2,10 +2,12 @@
 
 An **implementable, stack-agnostic, project-first, cost-aware Agent Skill**. It replaces the direction of v0.3 without overwriting or automatically removing the older skill. No sub-agent is bundled: single-agent Economy is the default.
 
+Coding, debugging, refactoring, and review require the separate [code simplicity and evidence policy](.agents/skills/adaptive-engineering/references/code-simplicity.md): minimal changes, justified validation, reuse, and verified assumptions.
+
 ## Contents
 
 - `.agents/skills/adaptive-engineering/SKILL.md`: compact project-first workflow
-- `references/`: conditional fallback, project discovery, validation, cost/delegation
+- `references/`: code simplicity, explicit learning, conditional fallback, project discovery, validation, cost/delegation
 - `scripts/inspect_project.py`: bounded root-manifest detection
 - `scripts/find_patterns.py`: targeted, bounded source search
 - `scripts/search_vault.py`: local Obsidian Markdown search (compact results)
@@ -74,6 +76,16 @@ Open the existing project in each coding agent and explicitly invoke the skill:
 
 First test local-only behavior, then a missing-pattern case that requires the vault, then explicit current-doc research. See `.agents/skills/adaptive-engineering/evals/scenarios.md`.
 
+## Learn and save knowledge
+
+After configuring an existing vault, ask the agent:
+
+- `$adaptive-engineering learn this` — summarize relevant supplied material or conversation into a note.
+- `$adaptive-engineering learn <topic>` — research authoritative sources and save bounded findings.
+- `$adaptive-engineering learn from <GitHub URL>` — save findings plus a repository catalog entry.
+
+These are natural-language requests, not shell commands. The agent follows [the learning workflow](.agents/skills/adaptive-engineering/references/learn.md). Your request authorizes relevant writes without another confirmation. Notes go to `research/candidates/` and remain unapproved, searchable candidates. Repeated learning updates clearly matching candidates; approved notes are preserved. Commits and pushes require separate authorization. A missing or inaccessible vault must be resolved before saving.
+
 ## Script examples
 
 ```bash
@@ -87,8 +99,8 @@ Search scripts return compact local JSON. `--scope app` assumes that directory e
 
 ## Design constraints
 
-- Not automatically using web; the agent controls official-doc browsing only when allowed by the fallback policy.
-- No automatic vault writes, Git commits or GitHub cloning/fetching.
+- Web research is permitted on the fallback branch or an explicit learning request.
+- No automatic vault writes during ordinary engineering. Explicit learning authorizes relevant notes and GitHub catalog updates, but not approval, Git commits/pushes, or repository cloning/fetching.
 - The repository catalog includes *candidate* URLs only; commits and versions are not pre-verified.
 - Python unit tests verify local tools/installer. Agent selection and true Codex allowance savings need live testing; see evals.
 

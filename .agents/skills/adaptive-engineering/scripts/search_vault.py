@@ -5,7 +5,7 @@ import argparse,json,re
 from pathlib import Path
 from _vault_common import resolve_vault
 
-SKIP={'.obsidian','.git','.trash','node_modules','attachments','templates','research'}
+SKIP={'.obsidian','.git','.trash','node_modules','attachments','templates'}
 
 def parse_frontmatter(text:str)->dict:
     if not text.startswith('---\n'): return {}
@@ -26,6 +26,7 @@ def search(vault:Path,query:str,limit:int=3,max_notes:int=1500)->dict:
     for p in sorted(vault.rglob('*.md')):
         rel=p.relative_to(vault)
         if any(part in SKIP or part.startswith('.') for part in rel.parts):continue
+        if 'research' in rel.parts and rel.parts[:2] != ('research','candidates'):continue
         if seen>=max_notes:truncated=True;break
         seen+=1
         try:

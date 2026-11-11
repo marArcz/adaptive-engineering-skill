@@ -4,7 +4,7 @@
 
 - One shared `.agents/skills/adaptive-engineering/SKILL.md` for Codex and Antigravity.
 - Project-first, stack-agnostic, **Economy** default. Zero automatic sub-agents.
-- Local Obsidian vault + optional Git repository, consulted only on fallback.
+- Local Obsidian vault + optional Git repository, consulted on fallback or explicit learning requests.
 - Candidate GitHub catalog, not an automatic code-fetcher.
 - No guaranteed savings in the Codex five-hour allowance: benchmark.
 
@@ -96,11 +96,17 @@ Pass: local project inspection **and** appropriate current official verification
 
 **Test E — cost:** Repeat a straightforward coding task with and without the skill using the same starting snapshot/model. Record usage information exposed by Codex/Antigravity, number of files read, research calls, tests and rework. The success measure is cost per correctly completed, validated task, not fewest tokens at any cost.
 
-See `.agents/skills/adaptive-engineering/evals/scenarios.md` for ten acceptance scenarios. Unit tests validate scripts only; they do **not** validate live agent decisions.
+**Test F — explicit learning:**
+
+> Use adaptive-engineering to learn this: [supply a small technical explanation or source URL].
+
+Pass: saves a source-linked candidate under `research/candidates/`, confirms search discovery, and reports its path without requesting duplicate authorization. For GitHub, also updates the reference catalog. No approval, commit, or push occurs.
+
+See `.agents/skills/adaptive-engineering/evals/scenarios.md` for acceptance scenarios. Unit tests validate scripts only; they do **not** validate live agent decisions.
 
 ## 5. Vault access if agents run sandboxed
 
-The vault is deliberately **outside** your project. If an agent cannot read sibling directories, adjust its workspace/permission policy or make an explicit read-only copy available. Do not disable sandboxing globally just to make retrieval easier, and do not add the vault as an automatic context directory. Local config is per OS/user: Windows and WSL need separate setup.
+The vault is deliberately **outside** your project. If an agent cannot read sibling directories, adjust its workspace/permission policy or make an explicit read-only copy available for retrieval. Learning requires write access to the intended vault; report blocked access rather than saving elsewhere. Do not disable sandboxing globally just to make retrieval easier, and do not add the vault as an automatic context directory. Local config is per OS/user: Windows and WSL need separate setup.
 
 ## 6. After it works
 

@@ -53,6 +53,48 @@ class ToolsTests(unittest.TestCase):
             self.assertTrue(md['matches'][0]['path'].endswith('validation.md'))
             catalog=json.loads(run(SCRIPTS/'search_catalog.py','--vault',v,'--query','laravel').stdout)
             self.assertEqual(catalog['matches'][0]['status'],'candidate')
+    def test_learned_candidates_searchable_but_other_research_excluded(self):
+        with tempfile.TemporaryDirectory() as t:
+            vault=Path(t)
+            included=['research/candidates/queue-retries.md',
+                      'research/candidates/python/queue-backoff.md']
+            excluded=['research/drafts/queue.md', 'research/queue.md',
+                      'research/candidates-old/queue.md', 'templates/queue.md',
+                      '.obsidian/queue.md', 'research/candidates/.hidden/queue.md',
+                      'research/candidates/node_modules/queue.md',
+                      'knowledge/research/candidates/queue.md']
+            for relative in included+excluded:
+                note=vault/relative
+                note.parent.mkdir(parents=True,exist_ok=True)
+                note.write_text('---\ntitle: Queue retries\nstatus: candidate\ntags: [queue]\n---\nBounded retries.\n',encoding='utf8')
+            result=json.loads(run(SCRIPTS/'search_vault.py','--vault',vault,'--query','queue','--limit',30).stdout)
+            self.assertEqual({m['path'] for m in result['matches']},set(included))
+            self.assertTrue(all(m['status']=='candidate' for m in result['matches']))
+            self.assertEqual(result['notes_examined'],len(included))
+
+    def test_catalog_supports_learned_entry_without_mutating_reviewed_metadata(self):
+        with tempfile.TemporaryDirectory() as t:
+            vault=Path(t); catalog=vault/'references'/'github'/'catalog.json'
+            catalog.parent.mkdir(parents=True)
+            existing={'id':'reviewed','url':'https://github.com/example/reviewed',
+                      'tags':['queue'],'status':'approved','reviewed_commit':'abc123',
+                      'verified_at':'2026-10-24','custom_field':'keep'}
+            learned={'id':'learned','url':'https://github.com/example/learned',
+                     'description':'Queue retry reference','tags':['queue'],
+                     'use_for':['bounded retries'],'status':'candidate',
+                     'reviewed_commit':None,'verified_at':None,
+                     'important_paths':['src/retry.py'],'limitations':['Unreviewed']}
+            original=json.dumps({'schema_version':1,'repositories':[existing,learned]})
+            catalog.write_text(original,encoding='utf8')
+            result=json.loads(run(SCRIPTS/'search_catalog.py','--vault',vault,'--query','queue').stdout)
+            by_id={m['id']:m for m in result['matches']}
+            self.assertEqual(by_id['learned']['status'],'candidate')
+            self.assertIsNone(by_id['learned']['reviewed_commit'])
+            self.assertEqual(by_id['learned']['important_paths'],['src/retry.py'])
+            self.assertEqual(by_id['reviewed']['status'],'approved')
+            self.assertEqual(by_id['reviewed']['reviewed_commit'],'abc123')
+            self.assertEqual(catalog.read_text(encoding='utf8'),original)
+
     def test_vault_missing_fails_without_fabrication(self):
         with tempfile.TemporaryDirectory() as t:
             p=Path(t)/'missing'
@@ -66,6 +108,7 @@ class ToolsTests(unittest.TestCase):
             self.assertFalse((repo/'.agents').exists())
             run(ROOT/'install.py','--target','repo','--repo',repo,'--with-agents')
             self.assertTrue((repo/'.agents'/'skills'/'adaptive-engineering'/'SKILL.md').is_file())
+            self.assertTrue((repo/'.agents'/'skills'/'adaptive-engineering'/'references'/'learn.md').is_file())
             self.assertEqual((repo/'AGENTS.md').read_text(),'existing policy')
             repeated=run(ROOT/'install.py','--target','repo','--repo',repo,ok=False)
             self.assertNotEqual(repeated.returncode,0)

@@ -4,7 +4,7 @@ tags: [engineering, index]
 
 # Engineering Vault
 
-A local **Obsidian vault backed by your own Git repository**, read by Codex and Antigravity only on a justified research fallback.
+A local **Obsidian vault backed by your own Git repository**, accessed by Codex and Antigravity on a justified research fallback or an explicit learning request.
 
 - [[INDEX]] — navigation and retrieval rules
 - [[knowledge/principles/engineering-decisions]] — universal principles
