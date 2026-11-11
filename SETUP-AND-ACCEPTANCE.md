@@ -1,4 +1,4 @@
-# Adaptive Engineering v0.4 — Setup and acceptance checklist
+# Adaptive Engineering v0.4.1 — Setup and acceptance checklist
 
 ## 0. Scope
 

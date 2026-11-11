@@ -3,7 +3,7 @@ name: adaptive-engineering
 description: Cost-efficient, stack-agnostic coding, debugging, refactoring, and code review using project patterns first. Also handles explicit learn requests to research or summarize material and save candidate knowledge and GitHub references to a configured engineering vault. For ordinary engineering, consult external references only when local patterns are insufficient or research is requested.
 ---
 
-# Adaptive Engineering (v0.4)
+# Adaptive Engineering (v0.4.1)
 
 Apply this workflow to software tasks in **any** stack. Favor a small, safe, validated change over a broad redesign. Follow applicable user and repository instructions.
 

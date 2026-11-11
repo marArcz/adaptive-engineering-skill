@@ -1,4 +1,4 @@
-# Adaptive Engineering v0.4 — Codex + Antigravity + Obsidian/Git
+# Adaptive Engineering v0.4.1 — Codex + Antigravity + Obsidian/Git
 
 An **implementable, stack-agnostic, project-first, cost-aware Agent Skill**. It replaces the direction of v0.3 without overwriting or automatically removing the older skill. No sub-agent is bundled: single-agent Economy is the default.
 
@@ -22,7 +22,7 @@ Python 3.9+ (standard library only); Git and Obsidian optional for actual versio
 
 ## Quick start (Windows PowerShell)
 
-Extract ZIP and `cd` into extracted `adaptive-engineering-v0.4` folder. Adjust paths:
+Download the release ZIP and `cd` into its extracted `adaptive-engineering-<tag>` folder. Adjust paths:
 
 ```powershell
 # Preview then create the Obsidian vault (optional Git init; no push)
@@ -103,6 +103,21 @@ Search scripts return compact local JSON. `--scope app` assumes that directory e
 - No automatic vault writes during ordinary engineering. Explicit learning authorizes relevant notes and GitHub catalog updates, but not approval, Git commits/pushes, or repository cloning/fetching.
 - The repository catalog includes *candidate* URLs only; commits and versions are not pre-verified.
 - Python unit tests verify local tools/installer. Agent selection and true Codex allowance savings need live testing; see evals.
+
+## Publishing a release
+
+The [release workflow](.github/workflows/release.yml) runs when a version tag is pushed. It runs the unit suite, builds an installable ZIP, tests the extracted bundle and installers, then publishes a GitHub Release with generated notes, `adaptive-engineering-<tag>.zip`, and `SHA256SUMS`. The archive includes the hidden `.agents/` skill directory and vault template; it excludes Git history, workflows, and untracked files.
+
+After committing and pushing the workflow and intended changes, update version labels in the documentation and skill as needed, commit those changes, and tag the release commit:
+
+```bash
+git tag -a v0.4.1 -m "Release v0.4.1"
+git push origin v0.4.1
+```
+
+Use `vMAJOR.MINOR.PATCH` tags. A suffix such as `v0.4.1-rc.1` publishes a prerelease. The workflow uses the repository's built-in `GITHUB_TOKEN` with `contents: write`; no personal token is needed. Existing releases are not overwritten. Workflow execution and publication must be verified in GitHub Actions after pushing a tag.
+
+On Linux, download both assets into the same directory and verify with `sha256sum -c SHA256SUMS` before extracting. On Windows, use `Get-FileHash .\adaptive-engineering-v0.4.1.zip -Algorithm SHA256` and compare it with `SHA256SUMS`.
 
 ## Official documentation references
 
