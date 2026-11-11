@@ -161,7 +161,8 @@ class ToolsTests(unittest.TestCase):
             run(ROOT/'init_vault.py','--path',v)
             self.assertTrue((v/'HOME.md').is_file())
             self.assertTrue((v/'references'/'github'/'catalog.json').is_file())
-            out=run(ROOT/'init_vault.py','--path',v,ok=False)
-            self.assertNotEqual(out.returncode,0)
+            original=(v/'HOME.md').read_bytes()
+            run(ROOT/'init_vault.py','--path',v)
+            self.assertEqual((v/'HOME.md').read_bytes(),original)
 
 if __name__=='__main__':unittest.main()

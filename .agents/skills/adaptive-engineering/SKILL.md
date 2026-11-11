@@ -44,6 +44,12 @@ For `learn <topic>`, `learn from <URL>`, or `learn this`, read [Learning to the 
 - Do not write to the vault without explicit authorization; a learning request supplies scoped authorization as described above. Commits, pushes, and marking knowledge `approved` require separate explicit authorization. Propose reusable findings separately; skip curation for ordinary engineering tasks.
 - If external research tools or vault access are unavailable, state the limitation and proceed using justified local knowledge where safe.
 
+## New personal memory boundary
+
+Before proposing any new managed personal-memory write, including learning-derived memory, corrections, consolidation, profile/identity summaries and journal entries, summarize components and evidence without project filesystem locations or device details. Do not copy paths from terminal output or quoted conversations. Preserve accurate provenance in words; never invent a source URL.
+
+Use the distribution's `memory_boundary.validate_memory_content` on the entire proposal, with known workspace roots, relative project paths and device identifiers supplied only at runtime. Repository URLs and explicit vault-relative memory links may remain. Rejected proposals must be re-summarized; never save the rejected content in an error note. If the helper is unavailable, report that new managed memory persistence is unavailable rather than bypassing the boundary. This does not authorize automatic capture or migrate existing legacy notes. Production writer integration remains forthcoming.
+
 ## Read supporting guidance only for the relevant branch
 
 - `references/fallback.md`: **only when fallback is activated**.

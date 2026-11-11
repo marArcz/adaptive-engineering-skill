@@ -1,0 +1,27 @@
+{
+  "base": {
+    "schema_version": 1,
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "user_fact",
+    "title": "Synthetic fact",
+    "scope": "general",
+    "basis": "user-stated",
+    "state": "current",
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-01T00:00:00Z",
+    "sources": ["Synthetic conversation"],
+    "related_ids": [],
+    "supersedes": []
+  },
+  "records": [
+    {"id": "00000000-0000-4000-8000-000000000001", "kind": "user_fact", "body": "The user likes pears.\n"},
+    {"id": "00000000-0000-4000-8000-000000000002", "kind": "preference", "basis": "inferred", "state": "superseded", "body": "Tentatively prefers short replies.\n"},
+    {"id": "00000000-0000-4000-8000-000000000003", "kind": "assistant_identity", "basis": "inferred", "body": "Observed working style: ask focused questions.\n"},
+    {"id": "00000000-0000-4000-8000-000000000004", "kind": "experience", "related_ids": ["00000000-0000-4000-8000-000000000006"], "body": "Context: planned a release. Significance: agreed on scope. Outcome: selected a date. Inferred lesson: smaller releases may help.\n"},
+    {"id": "00000000-0000-4000-8000-000000000005", "kind": "project", "scope": "project", "project_id": "00000000-0000-4000-8000-000000000005", "body": "Name: Synthetic project\nRepository: https://example.org/org/project\n"},
+    {"id": "00000000-0000-4000-8000-000000000006", "kind": "knowledge", "basis": "source-supported", "sources": ["https://example.org/reference"], "scope": "project", "project_id": "00000000-0000-4000-8000-000000000005", "body": "Decision: use a small release.\n"},
+    {"id": "00000000-0000-4000-8000-000000000007", "kind": "preference", "supersedes": ["00000000-0000-4000-8000-000000000002"], "body": "The user now prefers detailed replies.\n"},
+    {"id": "00000000-0000-4000-8000-000000000008", "kind": "user_fact", "state": "unresolved", "related_ids": ["00000000-0000-4000-8000-000000000001"], "body": "Conflicting report requires clarification.\n"}
+  ],
+  "deleted": [{"schema_version": 1, "id": "00000000-0000-4000-8000-000000000009", "deleted_at": "2026-01-02T00:00:00Z"}]
+}
