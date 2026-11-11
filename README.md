@@ -1,6 +1,6 @@
-# Adaptive Engineering v0.4.1 — Codex + Antigravity + Obsidian/Git
+# Adaptive Engineering — Codex + Antigravity + Obsidian/Git
 
-An **implementable, stack-agnostic, project-first, cost-aware Agent Skill**. It replaces the direction of v0.3 without overwriting or automatically removing the older skill. No sub-agent is bundled: single-agent Economy is the default.
+An **implementable, stack-agnostic, project-first, cost-aware Agent Skill**. No sub-agent is bundled: single-agent Economy is the default.
 
 Coding, debugging, refactoring, and review require the separate [code simplicity and evidence policy](.agents/skills/adaptive-engineering/references/code-simplicity.md): minimal changes, justified validation, reuse, and verified assumptions.
 
@@ -43,7 +43,7 @@ py -m unittest discover -s tests -v
 
 In Obsidian: **Open folder as vault** → select `C:\Dev\engineering-vault`. The `.obsidian/` directory will be created by Obsidian. `init_vault.py --git-init` performs `git init` only: create a private GitHub repository/remote yourself and review files for secrets before committing or pushing.
 
-If the project already has `AGENTS.md`, the installer preserves it; manually merge the short project-first policy from `AGENTS.example.md`. If the skill destination already exists it refuses to overwrite. If v0.3 `web-engineering` is installed, disable/remove that separately **after** checking v0.4 to avoid conflicting skill activations.
+If the project already has `AGENTS.md`, the installer preserves it; manually merge the short project-first policy from `AGENTS.example.md`. If the skill destination already exists it refuses to overwrite. If the legacy `web-engineering` skill is installed, disable/remove it separately **after** validating Adaptive Engineering to avoid conflicting skill activations.
 
 ## macOS/Linux
 
@@ -108,16 +108,17 @@ Search scripts return compact local JSON. `--scope app` assumes that directory e
 
 The [release workflow](.github/workflows/release.yml) runs when a version tag is pushed. It runs the unit suite, builds an installable ZIP, tests the extracted bundle and installers, then publishes a GitHub Release with generated notes, `adaptive-engineering-<tag>.zip`, and `SHA256SUMS`. The archive includes the hidden `.agents/` skill directory and vault template; it excludes Git history, workflows, and untracked files.
 
-After committing and pushing the workflow and intended changes, update version labels in the documentation and skill as needed, commit those changes, and tag the release commit:
+After committing and pushing the intended changes, tag the release commit:
 
 ```bash
-git tag -a v0.4.1 -m "Release v0.4.1"
-git push origin v0.4.1
+read -r -p "Release tag (vMAJOR.MINOR.PATCH): " release_tag
+git tag -a "$release_tag" -m "Release $release_tag"
+git push origin "$release_tag"
 ```
 
-Use `vMAJOR.MINOR.PATCH` tags. A suffix such as `v0.4.1-rc.1` publishes a prerelease. The workflow uses the repository's built-in `GITHUB_TOKEN` with `contents: write`; no personal token is needed. Existing releases are not overwritten. Workflow execution and publication must be verified in GitHub Actions after pushing a tag.
+Use `vMAJOR.MINOR.PATCH` tags. Adding a prerelease suffix such as `-rc.N` publishes a prerelease. The workflow uses the repository's built-in `GITHUB_TOKEN` with `contents: write`; no personal token is needed. Existing releases are not overwritten. Workflow execution and publication must be verified in GitHub Actions after pushing a tag.
 
-On Linux, download both assets into the same directory and verify with `sha256sum -c SHA256SUMS` before extracting. On Windows, use `Get-FileHash .\adaptive-engineering-v0.4.1.zip -Algorithm SHA256` and compare it with `SHA256SUMS`.
+On Linux, download both assets into the same directory and verify with `sha256sum -c SHA256SUMS` before extracting. On Windows, replace `<tag>` with the downloaded release's tag in `Get-FileHash .\adaptive-engineering-<tag>.zip -Algorithm SHA256` and compare it with `SHA256SUMS`.
 
 ## Official documentation references
 
