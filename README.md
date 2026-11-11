@@ -20,6 +20,30 @@ Coding, debugging, refactoring, and review require the separate [code simplicity
 
 Python 3.9+ (standard library only); Git and Obsidian optional for actual versioning/editing. The agent must have filesystem access to the relevant repo and vault; in sandboxed environments, allow access explicitly. No shell scripts download or execute code from the internet.
 
+## Codex marketplace installation
+
+Add this repository as a marketplace, then install its plugin:
+
+```bash
+codex plugin marketplace add marArcz/adaptive-engineering-skill
+codex plugin add adaptive-engineering@adaptive-engineering
+```
+
+Start a new Codex session after installation. You can also browse the marketplace through `/plugins`. Access to a private repository requires Git credentials with permission to read it.
+
+For local development, run `codex plugin marketplace add /absolute/path/to/adaptive-engineering-skill` instead of adding the GitHub source. The marketplace is named `adaptive-engineering`; its single plugin uses the same name. The supported `.codex-plugin/plugin.json` manifest points at the existing `.agents/skills/` directory, keeping one skill source for marketplace and standalone installation.
+
+The plugin includes no MCP server, hooks, or service connection. Configure a vault separately using the setup commands below if you want learning and vault retrieval. Choose marketplace installation or the standalone installer for Codex to avoid loading duplicate copies of the skill. The standalone installer remains available for Antigravity and repository-local use.
+
+To refresh a Git-backed installation:
+
+```bash
+codex plugin marketplace upgrade adaptive-engineering
+codex plugin add adaptive-engineering@adaptive-engineering
+```
+
+Restart Codex afterward. Marketplace setup follows the [official plugin packaging guide](https://developers.openai.com/plugins/build/plugins); this repository marketplace is separate from the public plugin directory.
+
 ## Quick start (Windows PowerShell)
 
 Download the release ZIP and `cd` into its extracted `adaptive-engineering-<tag>` folder. Adjust paths:
@@ -106,7 +130,7 @@ Search scripts return compact local JSON. `--scope app` assumes that directory e
 
 ## Publishing a release
 
-The [release workflow](.github/workflows/release.yml) runs when a version tag is pushed. It runs the unit suite, builds an installable ZIP, tests the extracted bundle and installers, then publishes a GitHub Release with generated notes, `adaptive-engineering-<tag>.zip`, and `SHA256SUMS`. The archive includes the hidden `.agents/` skill directory and vault template; it excludes Git history, workflows, and untracked files.
+The [release workflow](.github/workflows/release.yml) runs when a version tag is pushed. It runs the unit suite, builds an installable ZIP, tests the extracted bundle and installers, then publishes a GitHub Release with generated notes, `adaptive-engineering-<tag>.zip`, and `SHA256SUMS`. The archive includes the hidden `.agents/` skill and marketplace directories, `.codex-plugin/` manifest, icon assets, and vault template; it excludes Git history, workflows, and untracked files.
 
 After committing and pushing the intended changes, tag the release commit:
 

@@ -13,6 +13,21 @@ def run(script:Path,*args:str,ok=True)->subprocess.CompletedProcess:
     return result
 
 class ToolsTests(unittest.TestCase):
+    def test_marketplace_resolves_bundled_skill_and_assets(self):
+        marketplace=json.loads((ROOT/'.agents'/'plugins'/'marketplace.json').read_text())
+        self.assertEqual(len(marketplace['plugins']),1)
+        entry=marketplace['plugins'][0]
+        plugin_root=(ROOT/entry['source']['path']).resolve()
+        manifest=json.loads((plugin_root/'.codex-plugin'/'plugin.json').read_text())
+        self.assertEqual(entry['name'],manifest['name'])
+        skill_root=plugin_root/manifest['skills']/'adaptive-engineering'
+        self.assertEqual(skill_root.resolve(),SCRIPTS.parent.resolve())
+        for relative in ('SKILL.md','references/learn.md','references/code-simplicity.md',
+                         'scripts/search_vault.py','scripts/_vault_common.py'):
+            self.assertTrue((skill_root/relative).is_file(),relative)
+        for key in ('composerIcon','logo'):
+            self.assertTrue((plugin_root/manifest['interface'][key]).is_file(),key)
+
     def test_inspector_detects_laravel_php_and_no_installed_version_claim(self):
         with tempfile.TemporaryDirectory() as t:
             repo=Path(t)

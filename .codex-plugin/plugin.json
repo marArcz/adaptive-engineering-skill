@@ -1,0 +1,28 @@
+{
+  "name": "adaptive-engineering",
+  "version": "0.4.1",
+  "description": "Project-first engineering with code simplicity rules and explicit learning to a local knowledge vault.",
+  "author": {
+    "name": "marArcz",
+    "url": "https://github.com/marArcz"
+  },
+  "homepage": "https://github.com/marArcz/adaptive-engineering-skill",
+  "repository": "https://github.com/marArcz/adaptive-engineering-skill",
+  "keywords": ["engineering", "code-review", "simplicity", "knowledge-vault"],
+  "skills": "./.agents/skills/",
+  "interface": {
+    "displayName": "Adaptive Engineering",
+    "shortDescription": "Simple coding and learning",
+    "longDescription": "Inspect existing project patterns before coding, debugging, refactoring, or review. Keep changes simple and validate them with focused checks. Explicit learn requests save candidate knowledge and GitHub references to a configured local vault. Requires filesystem access and Python for helper scripts; vault setup is separate.",
+    "developerName": "marArcz",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/marArcz/adaptive-engineering-skill",
+    "defaultPrompt": [
+      "Find the closest existing implementation for this task and make the smallest coherent change.",
+      "Learn this material and save a concise candidate note to my configured engineering vault."
+    ],
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/icon.svg"
+  }
+}

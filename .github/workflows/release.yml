@@ -47,7 +47,8 @@ jobs:
           archive="dist/adaptive-engineering-$RELEASE_TAG.zip"
           git archive --format=zip --prefix="adaptive-engineering-$RELEASE_TAG/" \
             --output="$archive" HEAD -- \
-            .agents/skills/adaptive-engineering vault-template tests \
+            .agents/skills/adaptive-engineering .agents/plugins .codex-plugin assets \
+            vault-template tests \
             install.py init_vault.py configure.py AGENTS.example.md \
             README.md SETUP-AND-ACCEPTANCE.md
           echo "ARCHIVE=$archive" >> "$GITHUB_ENV"
