@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import os
 import re
 import subprocess
 import uuid
@@ -44,11 +45,13 @@ def repository_from_workspace(workspace: str | Path) -> str | None:
     path = Path(workspace)
     if not path.is_dir():
         raise ValueError('workspace: directory does not exist')
+    env = {key: value for key, value in os.environ.items() if not key.startswith('GIT_')}
+    env['GIT_OPTIONAL_LOCKS'] = '0'
     try:
-        check = subprocess.run(['git', '-C', str(path), 'rev-parse', '--git-dir'], capture_output=True, text=True, check=False)
+        check = subprocess.run(['git', '-C', str(path), 'rev-parse', '--git-dir'], capture_output=True, text=True, check=False, env=env)
         if check.returncode:
             raise ValueError('workspace: not an accessible Git repository')
-        result = subprocess.run(['git', '-C', str(path), 'config', '--get', 'remote.origin.url'], capture_output=True, text=True, check=False)
+        result = subprocess.run(['git', '-C', str(path), 'config', '--get', 'remote.origin.url'], capture_output=True, text=True, check=False, env=env)
     except OSError as exc:
         raise ValueError(f'workspace: cannot run Git: {exc}') from exc
     if result.returncode == 1:

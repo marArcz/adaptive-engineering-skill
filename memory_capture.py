@@ -100,7 +100,8 @@ def _statement(value):
 
 
 def capture(vault, proposal, *, skill_active=False, retain_sensitive=False, match_id=None,
-            project_roots=(), project_paths=(), device_identifiers=(), max_notes=1500):
+            project_roots=(), project_paths=(), device_identifiers=(), max_notes=1500,
+            append=False, expected_token=None, project_identity=False, create_new_project=False):
     """Classifications and authorization are trusted caller context, never source text."""
     if skill_active is not True:
         return _result('excluded', 'skill_inactive')
@@ -143,8 +144,32 @@ def capture(vault, proposal, *, skill_active=False, retain_sensitive=False, matc
             stats = snapshot['stats']
             if snapshot['incomplete'] or any(stats[k] for k in ('invalid_files', 'conflicted_records', 'unreadable_files', 'unsafe_links', 'oversized_files')):
                 return _result('unavailable', 'capture_evidence_incomplete')
-            found = search_memory(vault, data['title'], limit=30, max_notes=max_notes,
+            if project_identity:
+                from project_identity import match_project, parse_project
+                from memory_store import _serialize
+                if data['kind'] != 'project' or origin != 'user':
+                    return _result('excluded', 'invalid_project_identity_origin')
+                proposed = parse_project(_serialize(data, proposal['body']))
+                projects = [parse_project(_serialize(r['metadata'], r['body']))
+                            for r in snapshot['resolved'].values()
+                            if r['metadata']['kind'] == 'project' and r['metadata']['state'] == 'current'
+                            and r['metadata']['id'] not in snapshot['superseded']]
+                explicit = proposed['id'] if proposed['id'] in {p['id'] for p in projects} else None
+                match = match_project(projects, repository=proposed['repository'],
+                                      project_id=explicit, name=proposed['name'])
+                explicit_new = (create_new_project is True and explicit is None
+                                and match['status'] == 'ambiguous'
+                                and not any(p['repository'] and p['repository'] == proposed['repository'] for p in projects))
+                if match['status'] in ('ambiguous', 'conflict') and not explicit_new:
+                    return _result('needs_review', 'project_identity_ambiguous', candidates=match['candidate_ids'])
+                if match['status'] == 'matched':
+                    data['id'] = data['project_id'] = match['project_id']
+                    current_name = snapshot['resolved'][data['id']]['metadata']['title']
+                    if current_name != data['title']:
+                        return _result('needs_review', 'project_identity_subject_changed', candidates=[data['id']])
+            found = search_memory(vault, '' if project_identity else data['title'], limit=30, max_notes=max_notes,
                                   kind=data['kind'], scope=data['scope'], project_id=data.get('project_id'),
+                                  record_id=data['id'] if project_identity else None,
                                   history=True, _snapshot=snapshot)
             if found['truncated']:
                 return _result('unavailable', 'subject_search_truncated')
@@ -161,18 +186,33 @@ def capture(vault, proposal, *, skill_active=False, retain_sensitive=False, matc
             if len(candidates) > 1:
                 return _result('needs_review', 'ambiguous_subject', candidates=candidates)
             previous = None
+            target_body = proposal['body']
+            if append and (match_id is None or not candidates or category != 'useful_progress_commitments_questions' or data['kind'] != 'user_fact'):
+                return _result('needs_review', 'invalid_append_target', candidates=candidates)
             if candidates:
                 key = next(iter(candidates))
                 previous = snapshot['resolved'][key]
                 old = previous['metadata']
                 if (key in snapshot['superseded'] or old['state'] != 'current'
-                        or _subject(old['title']) != _subject(data['title'])
-                        or _statement(previous['body']) != _statement(proposal['body'])):
+                        or _subject(old['title']) != _subject(data['title'])):
+                    return _result('needs_review', 'changed_or_historical_statement', candidates=candidates)
+                same = _statement(previous['body']) == _statement(proposal['body'])
+                target_body = previous['body']
+                if append and not same:
+                    addition = '\n\nUpdate:\n' + proposal['body'].strip() + '\n'
+                    repeated = previous['body'].endswith(addition)
+                    if not repeated:
+                        if expected_token != previous['token'] or old['basis'] != data['basis']:
+                            return _result('needs_review', 'stale_append_or_changed_basis', candidates=candidates)
+                        target_body = previous['body'].rstrip() + addition
+                    elif any(source not in old['sources'] for source in proposal['sources']) and expected_token != previous['token']:
+                        return _result('needs_review', 'stale_append_evidence', candidates=candidates)
+                elif not same:
                     return _result('needs_review', 'changed_or_historical_statement', candidates=candidates)
                 data = dict(old)  # Preserve basis, identity, compatible fields and original statement.
                 sources = list(dict.fromkeys(old['sources'] + proposal['sources']))
                 related = list(dict.fromkeys(old['related_ids'] + proposal.get('related_ids', [])))
-                if sources == old['sources'] and related == old['related_ids']:
+                if sources == old['sources'] and related == old['related_ids'] and target_body == previous['body']:
                     return _result('unchanged', 'already_recorded', record_id=key)
                 data.update(sources=sources, related_ids=related)
             elif data['kind'] == 'project' and data['id'] in snapshot['resolved']:
@@ -183,7 +223,7 @@ def capture(vault, proposal, *, skill_active=False, retain_sensitive=False, matc
                 data['created_at'] = now
             if _policy(vault) != policy:
                 return _result('unavailable', 'capture_settings_changed')
-            result = write_record(vault, data, previous['body'] if previous else proposal['body'],
+            result = write_record(vault, data, target_body,
                                   expected_token=previous['token'] if previous else None,
                                   project_roots=project_roots, project_paths=project_paths,
                                   device_identifiers=device_identifiers)

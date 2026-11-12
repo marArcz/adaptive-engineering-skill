@@ -54,6 +54,8 @@ For explicit memory recall or record/relationship lookup, follow [Scoped memory 
 
 For structured active-skill capture proposals, follow [Selective capture](references/memory-capture.md). The capture API enforces policy and conservative deduplication; T16 still owns conversation workflow activation.
 
+For structured remember, inspect or project-continuation operations, follow [Memory operations](references/memory-operations.md). Changed facts and preferences require the later correction workflow rather than implicit replacement.
+
 ## Read supporting guidance only for the relevant branch
 
 - `references/fallback.md`: **only when fallback is activated**.
