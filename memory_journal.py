@@ -61,8 +61,9 @@ def journal(vault, subject, *, significance, context, happened, why, sources, or
         elif scope != 'general' or project_id is not None:
             return _result('unavailable','invalid_experience_scope')
         for key in links:
-            linked = snapshot['resolved'].get(key)
-            if linked is None or key in snapshot['superseded'] or linked['metadata']['state']!='current':
+            canonical=snapshot['aliases'].get(key,key)
+            linked = snapshot['resolved'].get(canonical)
+            if linked is None or canonical in snapshot['superseded'] or linked['metadata']['state']!='current':
                 return _result('needs_review','experience_reference_unavailable')
             data = linked['metadata']
             if data['scope']=='project' and (scope!='project' or data['project_id']!=project_id):

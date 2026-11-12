@@ -77,8 +77,17 @@ def decode_record(raw, *, revision=False):
         if not isinstance(envelope, dict) or type(envelope.get('version')) is not int:
             raise ValueError('unsupported revision envelope')
         fields = {'version', 'revision_id', 'parents'}
-        if envelope['version'] == 2:
+        if envelope['version'] in (2,3):
             fields |= {'dependencies', 'inherit_from'}
+            if envelope['version']==3:
+                fields.add('equivalent_ids')
+                equivalents=envelope.get('equivalent_ids')
+                if not isinstance(equivalents,list) or not equivalents:
+                    raise ValueError('invalid equivalent identities')
+                for key in equivalents:
+                    contract._uuid(key,'equivalent_id')
+                if len(set(equivalents))!=len(equivalents):
+                    raise ValueError('duplicate equivalent identity')
             dependencies = envelope.get('dependencies')
             if not isinstance(dependencies, dict):
                 raise ValueError('invalid dependencies')
@@ -106,6 +115,8 @@ def decode_record(raw, *, revision=False):
             if parent != 'base':
                 contract._uuid(parent, 'parent')
     data, body = _record(text)
+    if envelope and data['id'] in envelope.get('equivalent_ids',[]):
+        raise ValueError('self alias is invalid')
     return data, body, envelope
 
 
@@ -133,7 +144,8 @@ def _nodes(vault, record_id):
                 raise ValueError('duplicate memory or revision ID')
             nodes[revision] = {'metadata': data, 'body': body, 'digest': _digest(raw),
                                'parents': envelope['parents'] if envelope else {},
-                               'dependencies': envelope.get('dependencies', {}) if envelope else {}}
+                               'dependencies': envelope.get('dependencies', {}) if envelope else {},
+                               'equivalent_ids': envelope.get('equivalent_ids',[]) if envelope else []}
     return nodes
 
 
@@ -153,7 +165,10 @@ def read_record(vault, record_id, *, history=False):
     snapshot = memory_snapshot(vault)
     if snapshot['incomplete']:
         raise ValueError('semantic record scan incomplete')
-    current = snapshot['resolved'].get(record_id)
+    canonical=snapshot['aliases'].get(record_id,record_id) if not history else record_id
+    current = snapshot['resolved'].get(canonical)
+    if current is not None and canonical!=record_id:
+        current=dict(current,requested_id=record_id,canonical_id=canonical)
     if current is None:
         return None
     if current['metadata']['state'] != 'current':
@@ -193,7 +208,7 @@ def resolve_nodes(nodes):
               'token': token, 'tips': tips, 'changed_parents': mismatches}
     if result['status'] == 'current':
         node = nodes[tips[0]]
-        result.update(metadata=node['metadata'], body=node['body'], dependencies=node.get('dependencies',{}))
+        result.update(metadata=node['metadata'], body=node['body'], dependencies=node.get('dependencies',{}),equivalent_ids=node.get('equivalent_ids',[]))
     return result
 
 
@@ -248,7 +263,7 @@ class PublicationError(Exception):
 
 
 def write_record(vault, data, body, *, expected_token=None, revision_id=None, resolve=False,
-                 project_roots=(), project_paths=(), device_identifiers=(), dependencies=None, inherit_from=None):
+                 project_roots=(), project_paths=(), device_identifiers=(), dependencies=None, inherit_from=None, equivalent_ids=None):
     """Append a revision. Supply the returned snapshot token on updates/resolutions."""
     published = False
     try:
@@ -268,6 +283,8 @@ def write_record(vault, data, body, *, expected_token=None, revision_id=None, re
         current = read_revision_record(vault, data['id'])
         if dependencies is None and current and current['status']=='current' and current.get('dependencies'):
             dependencies=current['dependencies']
+        if equivalent_ids is None and current and current['status']=='current' and current.get('equivalent_ids'):
+            equivalent_ids=current['equivalent_ids']
         token = current['token'] if current else {}
         # Explicit revision IDs make retries deterministic, even after a lost response.
         directory = vault / 'memory/revisions'
@@ -282,6 +299,8 @@ def write_record(vault, data, body, *, expected_token=None, revision_id=None, re
         envelope = {'version': 1, 'revision_id': revision_id, 'parents': parents}
         if dependencies is not None:
             envelope.update(version=2, dependencies=dependencies, inherit_from=inherit_from)
+        if equivalent_ids:
+            envelope.update(version=3,dependencies=dependencies or {},inherit_from=inherit_from,equivalent_ids=sorted(equivalent_ids))
         raw = (PREFIX + json.dumps(envelope, sort_keys=True) + ' -->\n' + _serialize(data, body)).encode('utf-8')
         if len(raw)>128*1024:
             raise ValueError('record exceeds the supported bounded-reader size')

@@ -62,6 +62,8 @@ For derived user-profile and assistant working-style views, follow [Memory summa
 
 For explicit changes and ambiguous contradictions, follow [Memory corrections](references/memory-corrections.md). Do not choose a current value by timestamp or import order.
 
+For bounded duplicate maintenance, follow [Memory consolidation](references/memory-consolidation.md). Preserve historical experiences, provenance and tentative basis; skip uncertain merges.
+
 ## Read supporting guidance only for the relevant branch
 
 - `references/fallback.md`: **only when fallback is activated**.

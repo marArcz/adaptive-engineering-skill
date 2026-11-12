@@ -102,7 +102,8 @@ def _load(vault, max_notes):
                 nodes[revision] = {'metadata': data, 'body': body, 'digest': _digest(raw),
                                    'parents': envelope['parents'] if envelope else {},
                                    'path': path.relative_to(vault).as_posix(),
-                                   'dependencies': envelope.get('dependencies', {}) if envelope else {}}
+                                   'dependencies': envelope.get('dependencies', {}) if envelope else {},
+                                   'equivalent_ids': envelope.get('equivalent_ids',[]) if envelope else []}
             except (OSError, UnicodeError, ValueError, TypeError, KeyError, AttributeError):
                 stats['invalid_files'] += 1
                 ids = _identity(raw, path)
@@ -125,9 +126,9 @@ def _subject_key(data):
     return (data['kind'], data['scope'], data.get('project_id'), ' '.join(data['title'].split()).casefold())
 
 
-def _lifecycle(groups, resolved):
+def _lifecycle(groups, resolved, blocked_subjects=()):
     """Resolve subject claims without treating import order or timestamps as truth."""
-    conflicts=set()
+    conflicts={key for key,record in resolved.items() if _subject_key(record['metadata']) in blocked_subjects}
     edges={key:set() for key in resolved}
     for key,record in resolved.items():
         data=record['metadata']
@@ -166,6 +167,25 @@ def _lifecycle(groups, resolved):
         values={' '.join(resolved[key]['body'].split()) for key in keys}
         if len(values)>1:
             conflicts.update(keys)
+    aliases={}
+    for key,record in resolved.items():
+        if key in superseded or key in conflicts or record['metadata']['state']!='current':
+            continue
+        node=groups[key][record['tips'][0]]
+        for ref in node.get('equivalent_ids',[]):
+            target=resolved.get(ref)
+            ignored=set(node.get('equivalent_ids',[]))|{key}
+            if (target is None or ref not in edges[key] or _subject_key(target['metadata'])!=_subject_key(record['metadata'])
+                    or target['metadata']['basis']!=record['metadata']['basis'] or target['body']!=record['body']
+                    or {k:v for k,v in target['metadata'].items() if k not in contract.FIELDS}!={k:v for k,v in record['metadata'].items() if k not in contract.FIELDS}
+                    or not set(target['metadata']['sources'])<=set(record['metadata']['sources'])
+                    or not (set(target['metadata']['related_ids'])-ignored)<=set(record['metadata']['related_ids'])
+                    or node.get('dependencies',{}).get(ref)!=target['token']):
+                conflicts.add(key)
+                continue
+            if ref in aliases and aliases[ref]!=key:
+                conflicts.update((key,aliases[ref]))
+            aliases[ref]=key
     changed=True
     while changed:
         changed=False
@@ -174,13 +194,14 @@ def _lifecycle(groups, resolved):
             if data['basis']!='inferred' or key in conflicts or key in superseded:
                 continue
             if any(ref not in resolved or ref in superseded or ref in conflicts
-                   or resolved[ref]['metadata']['state']!='current' for ref in data['related_ids']):
+                   or resolved[ref]['metadata']['state']!='current' for raw_ref in data['related_ids'] for ref in [aliases.get(raw_ref,raw_ref)]):
                 conflicts.add(key)
                 changed=True
     for key,record in list(resolved.items()):
         state='unresolved' if key in conflicts else 'superseded' if key in superseded else record['metadata']['state']
         resolved[key]=dict(record,metadata=dict(record['metadata'],state=state))
-    return superseded,conflicts
+    aliases={ref:key for ref,key in aliases.items() if ref not in conflicts and key not in conflicts}
+    return superseded,conflicts,aliases
 
 
 def memory_snapshot(vault, max_notes=1500):
@@ -190,6 +211,7 @@ def memory_snapshot(vault, max_notes=1500):
         raise ValueError("Vault must exist and max_notes must be positive")
     groups, deleted, stats, incomplete, scan_truncated = _load(vault, max_notes)
     resolved = {}
+    blocked_subjects=set()
     for key, nodes in groups.items():
         if key in deleted:
             continue
@@ -197,14 +219,16 @@ def memory_snapshot(vault, max_notes=1500):
             current = resolve_nodes(nodes)
             if current['status'] == 'conflict':
                 stats['conflicted_records'] += 1
+                blocked_subjects.update(_subject_key(node['metadata']) for node in nodes.values())
                 continue
             resolved[key] = current
         except ValueError:
             stats['conflicted_records'] += 1
-    superseded,semantic_conflicts=_lifecycle(groups,resolved)
+            blocked_subjects.update(_subject_key(node['metadata']) for node in nodes.values())
+    superseded,semantic_conflicts,aliases=_lifecycle(groups,resolved,blocked_subjects)
     stats['conflicted_records']+=len(semantic_conflicts)
     return {"groups": groups, "resolved": resolved, "superseded": superseded,
-            "semantic_conflicts":semantic_conflicts,
+            "semantic_conflicts":semantic_conflicts,"aliases":aliases,
             "stats": stats, "incomplete": incomplete, "scan_truncated": scan_truncated}
 
 
@@ -232,6 +256,8 @@ def search_memory(vault, query='', limit=3, max_notes=1500, *, kind=None, scope=
     snapshot = _snapshot if _snapshot is not None else memory_snapshot(vault, max_notes)
     groups, resolved, superseded = (snapshot[k] for k in ('groups', 'resolved', 'superseded'))
     stats, incomplete, scan_truncated = (snapshot[k] for k in ('stats', 'incomplete', 'scan_truncated'))
+    if record_id and not history:
+        record_id=snapshot['aliases'].get(record_id,record_id)
     rows = []
     for key, current in resolved.items():
         if record_id and key != record_id:
@@ -256,7 +282,7 @@ def search_memory(vault, query='', limit=3, max_notes=1500, *, kind=None, scope=
             elif scope not in ('all', 'general') and not record_id and data['scope'] == 'project':
                 continue
             references = data['related_ids'] + data['supersedes']
-            if related_to and related_to not in references:
+            if related_to and snapshot['aliases'].get(related_to,related_to) not in {snapshot['aliases'].get(r,r) for r in references}:
                 continue
             score = sum(2 * (t in data['title'].casefold()) + (t in node['body'].casefold()) for t in terms)
             if terms and score == 0:
@@ -268,7 +294,8 @@ def search_memory(vault, query='', limit=3, max_notes=1500, *, kind=None, scope=
             row.update(title=data['title'][:240], revision_id=revision, path=node['path'], score=score,
                        historical=historical, tentative=data['basis'] == 'inferred',
                        sources=[s[:300] for s in data['sources'][:3]],
-                       related_ids=data['related_ids'][:20], supersedes=data['supersedes'][:20],
+                       related_ids=data['related_ids'][:20],
+                       resolved_related_ids=[snapshot['aliases'].get(r,r) for r in data['related_ids'][:20]], supersedes=data['supersedes'][:20],
                        missing_reference_ids=sorted({r for r in references if r not in resolved})[:20],
                        pointer_truncated=len(data['title']) > 240 or len(data['sources']) > 3
                        or any(len(s) > 300 for s in data['sources'][:3])

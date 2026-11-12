@@ -125,6 +125,8 @@ def inspect_record(vault, record_id, *, project_id=None, max_notes=1500):
         snapshot = memory_snapshot(vault, max_notes)
         if snapshot['incomplete']:
             return {'status':'unavailable'}
+        requested_id=record_id
+        record_id=snapshot['aliases'].get(record_id,record_id)
         current = snapshot['resolved'].get(record_id)
         if current is None:
             return {'status':'unavailable' if record_id in snapshot['groups'] or snapshot['stats']['invalid_files'] else 'not_found'}
@@ -133,7 +135,7 @@ def inspect_record(vault, record_id, *, project_id=None, max_notes=1500):
             return {'status':'not_found'}
         if record_id in snapshot['superseded'] or data['state'] != 'current':
             return {'status':'not_current'}
-        return {'status':'current', 'metadata':dict(data), 'body':current['body'], 'token':dict(current['token'])}
+        return {'status':'current', 'metadata':dict(data), 'body':current['body'], 'token':dict(current['token']), 'requested_id':requested_id, 'canonical_id':record_id}
     except (OSError, ValueError, TypeError, KeyError):
         return {'status':'unavailable'}
 

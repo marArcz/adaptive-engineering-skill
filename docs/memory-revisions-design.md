@@ -58,3 +58,25 @@ Clients reading corrected vaults must support envelope version 2 and semantic
 lifecycle resolution. Version 1 inner records and old revision files are not
 rewritten. Older readers must be upgraded before relying on current recall;
 actual mixed-client/two-device validation remains T21/T22.
+
+## Version 3 equivalent identities (T14)
+
+Version 3 retains the version 2 fields and adds a required nonempty equivalent_ids
+list of distinct logical UUIDs, excluding the canonical record's own ID. Versions
+1 and 2 remain readable; the inner record schema remains version 1. Ordinary
+evidence updates retain equivalences and dependency guards. Clients reading
+consolidated vaults must support version 3 and semantic alias validation.
+
+Consolidation appends to the deterministic canonical logical ID, preserving all
+old bytes. Each equivalent ID has an explicit supersedes relationship and a
+complete dependency token. Semantic readers validate matching subject, body,
+basis and compatible metadata, retained provenance and external relationships,
+and unchanged source snapshots before redirecting old IDs to the canonical ID.
+Explicit history still reads the original logical record. A later correction
+with different content does not inherit equivalence merely through supersession.
+
+Derived summaries resolve these aliases on their next read. Graph conflicts also
+quarantine other claims for the same subject and scope, so an unavailable
+canonical graph cannot cause a stale duplicate to resurface as current advice.
+Consolidation performs no age-based deletion or physical archive compaction.
+Forgetting must include equivalent identities and their retained histories.

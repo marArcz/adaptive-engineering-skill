@@ -197,6 +197,7 @@ def capture(vault, proposal, *, skill_active=False, retain_sensitive=False, matc
             if active_candidates:
                 candidates=active_candidates
             if match_id is not None:
+                match_id=snapshot['aliases'].get(match_id,match_id)
                 contract._uuid(match_id, 'match_id')
                 if match_id not in candidates:
                     return _result('needs_review', 'explicit_match_disagrees', candidates=candidates)

@@ -80,7 +80,7 @@ class MemorySearchTests(unittest.TestCase):
         self.assertIn(unresolved['id'], {r['id'] for r in self.find(history=True)['matches']})
 
     def test_deletions_invalid_records_and_conflicts_are_excluded(self):
-        valid, _ = self.add()
+        valid, _ = self.add(title='Independent queue fact')
         deleted, _ = self.add()
         bad, result = self.add()
         bad_path = self.vault / 'memory/revisions' / f"{bad['id']}.{result['revision_id']}.md"

@@ -90,3 +90,9 @@ retain their historical metadata; semantic readers expose effective current
 state. Correction records have fresh logical IDs, except project identity
 changes that retain the stable project ID and preserve prior revision history.
 See the bundled memory-corrections guide and revision storage contract.
+
+T14 appends envelope-v3 revisions for exact duplicate consolidation. Validated
+equivalent IDs resolve to the current canonical record while explicit history
+preserves original sources. This does not change the v1 inner schema, promote
+inferred material, or delete old experiences. See the revision storage contract
+and bundled memory-consolidation guide for alias guards and bounded maintenance.

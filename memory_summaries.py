@@ -40,7 +40,7 @@ def _feedback(node):
 
 def _independent(keys, nodes, events):
     selected, seen_events, seen_sources = [], set(), set()
-    for key in sorted(keys):
+    for key in sorted(set(keys)):
         fingerprint = _normal(events[key]['what_happened'])
         sources = {_normal(s) for s in nodes[key]['metadata']['sources']}
         if fingerprint in seen_events or not sources or sources & seen_sources:
@@ -77,7 +77,7 @@ def summary_entries(snapshot, *, project_id=None, profile_only=False):
                              'sources':list(data['sources']),
                              'missing_links':sum(ref not in snapshot['resolved'] or ref in snapshot['superseded']
                                                  or snapshot['resolved'][ref]['metadata']['state']!='current'
-                                                 for ref in data['related_ids']+data['supersedes'])})
+                                                 for original in data['related_ids']+data['supersedes'] for ref in [snapshot['aliases'].get(original,original)])})
         row={'text':text,'basis':basis,'tentative':basis=='inferred','source_records':pointers,
              'view':view,'entry_type':kind,'scope':scope,'is_source':False}
         if project is not None:
@@ -93,7 +93,7 @@ def summary_entries(snapshot, *, project_id=None, profile_only=False):
         elif data['kind']=='assistant_identity' and not profile_only:
             support=[]
             if data['basis']=='inferred':
-                eligible=[r for r in data['related_ids'] if r in events
+                eligible=[r for original in data['related_ids'] for r in [snapshot['aliases'].get(original,original)] if r in events
                           and nodes[r]['metadata']['scope']==data['scope']
                           and nodes[r]['metadata'].get('project_id')==data.get('project_id')]
                 support=_independent(eligible,nodes,events)

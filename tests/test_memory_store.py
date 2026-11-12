@@ -141,7 +141,7 @@ class StoreTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'cycle'):
             store.read_record(self.vault, self.data['id'])
         second.unlink()
-        revision(one, {}, version=3)
+        revision(one, {}, version=4)
         with self.assertRaisesRegex(ValueError, 'unsupported'):
             store.read_record(self.vault, self.data['id'])
         first.unlink()
