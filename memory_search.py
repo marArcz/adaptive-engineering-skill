@@ -120,8 +120,32 @@ def _load(vault, max_notes):
     return groups, deleted, stats, incomplete, scan_truncated
 
 
+def memory_snapshot(vault, max_notes=1500):
+    """Load one bounded, validated snapshot for search and context assembly."""
+    vault = Path(vault)
+    if not vault.is_dir() or max_notes < 1:
+        raise ValueError("Vault must exist and max_notes must be positive")
+    groups, deleted, stats, incomplete, scan_truncated = _load(vault, max_notes)
+    resolved = {}
+    for key, nodes in groups.items():
+        if key in deleted:
+            continue
+        try:
+            current = resolve_nodes(nodes)
+            if current['status'] == 'conflict':
+                stats['conflicted_records'] += 1
+                continue
+            resolved[key] = current
+        except ValueError:
+            stats['conflicted_records'] += 1
+    superseded = {ref for current in resolved.values()
+                  for ref in current['metadata']['supersedes']}
+    return {"groups": groups, "resolved": resolved, "superseded": superseded,
+            "stats": stats, "incomplete": incomplete, "scan_truncated": scan_truncated}
+
+
 def search_memory(vault, query='', limit=3, max_notes=1500, *, kind=None, scope=None,
-                  project_id=None, record_id=None, related_to=None, history=False):
+                  project_id=None, record_id=None, related_to=None, history=False, _snapshot=None):
     """Return pointers and provenance, not full remembered content or deletion metadata."""
     vault = Path(vault)
     if not vault.is_dir():
@@ -140,21 +164,9 @@ def search_memory(vault, query='', limit=3, max_notes=1500, *, kind=None, scope=
     terms = [s.casefold() for s in re.findall(r'[\w.+-]+', query) if len(s) > 1]
     if not terms and not (record_id or related_to):
         raise ValueError('provide searchable words, a record ID or a relationship ID')
-    groups, deleted, stats, incomplete, scan_truncated = _load(vault, max_notes)
-    resolved = {}
-    for key, nodes in groups.items():
-        if key in deleted:
-            continue
-        try:
-            current = resolve_nodes(nodes)
-            if current['status'] == 'conflict':
-                stats['conflicted_records'] += 1
-                continue
-            resolved[key] = current
-        except ValueError:
-            stats['conflicted_records'] += 1
-    superseded = {ref for current in resolved.values()
-                  for ref in current['metadata']['supersedes']}
+    snapshot = _snapshot if _snapshot is not None else memory_snapshot(vault, max_notes)
+    groups, resolved, superseded = (snapshot[k] for k in ('groups', 'resolved', 'superseded'))
+    stats, incomplete, scan_truncated = (snapshot[k] for k in ('stats', 'incomplete', 'scan_truncated'))
     rows = []
     for key, current in resolved.items():
         if record_id and key != record_id:
