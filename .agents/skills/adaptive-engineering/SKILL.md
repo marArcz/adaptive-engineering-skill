@@ -58,6 +58,8 @@ For structured remember, inspect or project-continuation operations, follow [Mem
 
 For selective shared-experience accounts and related-experience lookup, follow [Experience journal](references/memory-journal.md). Keep observed events separate from tentative lessons and skip routine exchanges.
 
+For derived user-profile and assistant working-style views, follow [Memory summaries](references/memory-summaries.md). Summaries are source-linked views, not independent evidence; inferred identity needs independent support.
+
 ## Read supporting guidance only for the relevant branch
 
 - `references/fallback.md`: **only when fallback is activated**.
