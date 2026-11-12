@@ -101,7 +101,8 @@ def _statement(value):
 
 def capture(vault, proposal, *, skill_active=False, retain_sensitive=False, match_id=None,
             project_roots=(), project_paths=(), device_identifiers=(), max_notes=1500,
-            append=False, expected_token=None, project_identity=False, create_new_project=False):
+            append=False, expected_token=None, project_identity=False, create_new_project=False,
+            includes_inference=False):
     """Classifications and authorization are trusted caller context, never source text."""
     if skill_active is not True:
         return _result('excluded', 'skill_inactive')
@@ -131,7 +132,7 @@ def capture(vault, proposal, *, skill_active=False, retain_sensitive=False, matc
         boundaries = policy['boundaries']
         if boundaries[category] == 'exclude' or (sensitive and boundaries['sensitive_personal_details'] == 'exclude'):
             return _result('excluded', 'configured_exclusion')
-        if origin == 'inference' and boundaries['inferences'] == 'exclude':
+        if (origin == 'inference' or includes_inference is True) and boundaries['inferences'] == 'exclude':
             return _result('excluded', 'inferences_excluded')
         gate = capture_gate(vault)
         if not gate.allowed:

@@ -56,6 +56,8 @@ For structured active-skill capture proposals, follow [Selective capture](refere
 
 For structured remember, inspect or project-continuation operations, follow [Memory operations](references/memory-operations.md). Changed facts and preferences require the later correction workflow rather than implicit replacement.
 
+For selective shared-experience accounts and related-experience lookup, follow [Experience journal](references/memory-journal.md). Keep observed events separate from tentative lessons and skip routine exchanges.
+
 ## Read supporting guidance only for the relevant branch
 
 - `references/fallback.md`: **only when fallback is activated**.
