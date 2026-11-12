@@ -1,4 +1,4 @@
-"""Reference reader for the T01 Markdown contract; no vault writes."""
+"""Shared validation for the v1 Markdown record contract; no vault writes."""
 import datetime
 import json
 import uuid

@@ -6,7 +6,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
-AREAS = ('profile', 'identity', 'experiences', 'projects', 'knowledge/general')
+AREAS = ('profile', 'identity', 'experiences', 'projects', 'knowledge/general', 'revisions')
 POLICY = Path('memory') / 'capture-settings.json'
 DEFAULT_POLICY = {
     'schema_version': 1,

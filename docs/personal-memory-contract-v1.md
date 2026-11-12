@@ -70,3 +70,14 @@ with actionable errors, preserve values on serialization, and implement
 recoverable writes. T07 must distinguish these records from legacy search.
 T03 and T04 implement project identification and path exclusion. The contract
 alone does not satisfy the end-to-end A03, A06, A10, or A13 checks.
+
+## Revision storage
+
+T06 adds a separate versioned revision envelope around complete v1 records,
+without changing their fields. See [Memory revision storage](memory-revisions-design.md)
+for publication, graph resolution, compatibility and conflict outcomes. The
+logical record UUID stays stable across revisions. Revision-aware consumers
+must resolve the graph before using a current record; repeated logical IDs in
+recognized revisions are not duplicate records. Standalone duplicate v1 records
+remain invalid. Corrections between distinct logical memories still use
+`supersedes`, independently of revision history.
