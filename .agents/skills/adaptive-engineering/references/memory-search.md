@@ -24,3 +24,10 @@ Search order is deterministic for an unchanged vault. Memory ranking scores titl
 An incomplete memory scan suppresses memory results: a skipped file could contain a deletion, revision branch or supersession. Invalid files with recoverable IDs quarantine those records, allowing safe unrelated records to remain readable. Unidentifiable damaged records, invalid deletion metadata, inaccessible directories or unsafe directory links suppress all managed memory results and set memory_incomplete. Counts report invalid, unreadable, oversized and conflicted inputs. Legacy results can remain available independently. Readers observe filesystem snapshots rather than a lock against concurrent edits; re-open relevant sources before applying an update.
 
 Standalone installation bundles the shared memory modules beside the search script. T18 still owns full plugin packaging and installation acceptance. No capture workflow is activated by search.
+
+T13 also resolves effective lifecycle and competing claims sharing a kind,
+normalized subject and scope. Semantic conflicts are excluded from current
+recall; explicit history exposes them as unresolved historical candidates.
+Revision-graph conflicts remain excluded even in history. Valid supersession
+links cannot cross project/subject boundaries, and inferred records lose current
+status when their linked supporting records become non-current.

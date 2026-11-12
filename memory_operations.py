@@ -122,10 +122,12 @@ def inspect_record(vault, record_id, *, project_id=None, max_notes=1500):
     try:
         from memory_contract import _uuid
         _uuid(record_id, 'record_id')
-        snapshot = _snapshot(vault, max_notes)
+        snapshot = memory_snapshot(vault, max_notes)
+        if snapshot['incomplete']:
+            return {'status':'unavailable'}
         current = snapshot['resolved'].get(record_id)
         if current is None:
-            return {'status':'not_found'}
+            return {'status':'unavailable' if record_id in snapshot['groups'] or snapshot['stats']['invalid_files'] else 'not_found'}
         data = current['metadata']
         if project_id is not None and (data['scope'] != 'project' or data['project_id'] != project_id):
             return {'status':'not_found'}

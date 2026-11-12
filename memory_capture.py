@@ -26,7 +26,7 @@ def _result(status, reason, *, candidates=(), writer=None, record_id=None):
     if record_id:
         result['record_id'] = record_id
     if writer is not None:
-        result['may_have_written'] = writer.get('may_have_written', status in ('created', 'updated', 'conflict'))
+        result['may_have_written'] = writer.get('may_have_written', writer.get('status') in ('created', 'updated', 'conflict'))
     if status in ('created', 'updated'):
         result['announcement'] = 'Memory saved.' if status == 'created' else 'Memory evidence updated.'
     return result
@@ -99,44 +99,57 @@ def _statement(value):
     return ' '.join(value.split())
 
 
+def prepare_capture(vault, proposal, *, skill_active=False, retain_sensitive=False,
+                    project_roots=(), project_paths=(), device_identifiers=(), includes_inference=False):
+    """Shared policy/path/merge eligibility for capture and lifecycle operations."""
+    if skill_active is not True:
+        return None, None, _result('excluded', 'skill_inactive')
+    data = _validate(proposal)
+    flags, category, origin = proposal['flags'], proposal['category'], proposal['origin']
+    if origin in ('hypothetical', 'source_instruction'):
+        return None, None, _result('excluded', 'non_memory_source')
+    if any(flags[key] for key in ('temporary', 'do_not_remember', 'secret', 'third_party_private')):
+        return None, None, _result('excluded', 'required_exclusion')
+    if category in ('temporary_or_do_not_remember', 'credentials_and_third_party_private_data', 'project_filesystem_paths'):
+        return None, None, _result('excluded', 'required_exclusion')
+    if origin == 'source' and data['kind'] != 'knowledge':
+        return None, None, _result('excluded', 'source_cannot_assert_personal_fact')
+    sensitive = flags['sensitive'] or category == 'sensitive_personal_details'
+    if sensitive and (retain_sensitive is not True or origin != 'user'):
+        return None, None, _result('excluded', 'sensitive_requires_direct_retain_request')
+    # Inference classification cannot be promoted by a nominal user origin.
+    if category == 'inferences' and origin != 'inference':
+        return None, None, _result('excluded', 'inconsistent_inference_classification')
+    validate_memory_content({'metadata': data, 'body': proposal['body']}, project_roots=project_roots,
+                            project_paths=project_paths, device_identifiers=device_identifiers)
+    vault = Path(vault)
+    policy = _policy(vault)
+    if policy['capture'] == 'paused':
+        return None, None, _result('paused', 'capture_paused')
+    boundaries = policy['boundaries']
+    if boundaries[category] == 'exclude' or (sensitive and boundaries['sensitive_personal_details'] == 'exclude'):
+        return None, None, _result('excluded', 'configured_exclusion')
+    if (origin == 'inference' or includes_inference is True) and boundaries['inferences'] == 'exclude':
+        return None, None, _result('excluded', 'inferences_excluded')
+    gate = capture_gate(vault)
+    if not gate.allowed:
+        return None, None, _result('unavailable', 'merge_gate_blocked')
+    return data, policy, None
+
+
 def capture(vault, proposal, *, skill_active=False, retain_sensitive=False, match_id=None,
             project_roots=(), project_paths=(), device_identifiers=(), max_notes=1500,
             append=False, expected_token=None, project_identity=False, create_new_project=False,
             includes_inference=False):
     """Classifications and authorization are trusted caller context, never source text."""
-    if skill_active is not True:
-        return _result('excluded', 'skill_inactive')
     try:
-        data = _validate(proposal)
-        flags, category, origin = proposal['flags'], proposal['category'], proposal['origin']
-        if origin in ('hypothetical', 'source_instruction'):
-            return _result('excluded', 'non_memory_source')
-        if any(flags[key] for key in ('temporary', 'do_not_remember', 'secret', 'third_party_private')):
-            return _result('excluded', 'required_exclusion')
-        if category in ('temporary_or_do_not_remember', 'credentials_and_third_party_private_data', 'project_filesystem_paths'):
-            return _result('excluded', 'required_exclusion')
-        if origin == 'source' and data['kind'] != 'knowledge':
-            return _result('excluded', 'source_cannot_assert_personal_fact')
-        sensitive = flags['sensitive'] or category == 'sensitive_personal_details'
-        if sensitive and (retain_sensitive is not True or origin != 'user'):
-            return _result('excluded', 'sensitive_requires_direct_retain_request')
-        # Inference classification cannot be promoted by a nominal user origin.
-        if category == 'inferences' and origin != 'inference':
-            return _result('excluded', 'inconsistent_inference_classification')
-        validate_memory_content({'metadata': data, 'body': proposal['body']}, project_roots=project_roots,
-                                project_paths=project_paths, device_identifiers=device_identifiers)
+        data, policy, blocked = prepare_capture(vault, proposal, skill_active=skill_active,
+            retain_sensitive=retain_sensitive, project_roots=project_roots, project_paths=project_paths,
+            device_identifiers=device_identifiers, includes_inference=includes_inference)
+        if blocked is not None:
+            return blocked
         vault = Path(vault)
-        policy = _policy(vault)
-        if policy['capture'] == 'paused':
-            return _result('paused', 'capture_paused')
-        boundaries = policy['boundaries']
-        if boundaries[category] == 'exclude' or (sensitive and boundaries['sensitive_personal_details'] == 'exclude'):
-            return _result('excluded', 'configured_exclusion')
-        if (origin == 'inference' or includes_inference is True) and boundaries['inferences'] == 'exclude':
-            return _result('excluded', 'inferences_excluded')
-        gate = capture_gate(vault)
-        if not gate.allowed:
-            return _result('unavailable', 'merge_gate_blocked')
+        category, origin = proposal['category'], proposal['origin']
         with _capture_lock(vault):
             # Recheck policy after acquiring the lock rather than acting on old settings.
             if _policy(vault) != policy:
@@ -179,6 +192,10 @@ def capture(vault, proposal, *, skill_active=False, retain_sensitive=False, matc
                 node = snapshot['groups'][row['id']][row['revision_id']]
                 if _subject(node['metadata']['title']) == _subject(data['title']):
                     candidates.add(row['id'])
+            active_candidates={row['id'] for row in found['matches']
+                               if row['id'] in candidates and row['state']=='current' and not row['historical']}
+            if active_candidates:
+                candidates=active_candidates
             if match_id is not None:
                 contract._uuid(match_id, 'match_id')
                 if match_id not in candidates:

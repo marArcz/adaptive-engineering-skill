@@ -54,11 +54,13 @@ For explicit memory recall or record/relationship lookup, follow [Scoped memory 
 
 For structured active-skill capture proposals, follow [Selective capture](references/memory-capture.md). The capture API enforces policy and conservative deduplication; T16 still owns conversation workflow activation.
 
-For structured remember, inspect or project-continuation operations, follow [Memory operations](references/memory-operations.md). Changed facts and preferences require the later correction workflow rather than implicit replacement.
+For structured remember, inspect or project-continuation operations, follow [Memory operations](references/memory-operations.md). Changed facts and preferences require the explicit correction workflow rather than implicit replacement.
 
 For selective shared-experience accounts and related-experience lookup, follow [Experience journal](references/memory-journal.md). Keep observed events separate from tentative lessons and skip routine exchanges.
 
 For derived user-profile and assistant working-style views, follow [Memory summaries](references/memory-summaries.md). Summaries are source-linked views, not independent evidence; inferred identity needs independent support.
+
+For explicit changes and ambiguous contradictions, follow [Memory corrections](references/memory-corrections.md). Do not choose a current value by timestamp or import order.
 
 ## Read supporting guidance only for the relevant branch
 

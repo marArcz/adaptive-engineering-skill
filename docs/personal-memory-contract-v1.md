@@ -81,3 +81,12 @@ must resolve the graph before using a current record; repeated logical IDs in
 recognized revisions are not duplicate records. Standalone duplicate v1 records
 remain invalid. Corrections between distinct logical memories still use
 `supersedes`, independently of revision history.
+
+## Effective lifecycle
+
+T13 derives superseded/unresolved state from valid same-subject links, source
+snapshot dependencies and competing claims. The original immutable record bytes
+retain their historical metadata; semantic readers expose effective current
+state. Correction records have fresh logical IDs, except project identity
+changes that retain the stable project ID and preserve prior revision history.
+See the bundled memory-corrections guide and revision storage contract.

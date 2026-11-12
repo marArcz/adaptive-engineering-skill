@@ -35,3 +35,26 @@ The snapshot can become stale immediately after a successful response. Another a
 T07 must use the resolver and exclude unresolved branches from current recall. Existing legacy search is not yet memory-aware. T15 must remove every revision containing forgotten content, including conflict branches, and propagate payload-free deletion markers. Revision retention is not yet an implementation of forgetting. Git history and backups remain outside active-memory deletion.
 
 Synthetic tests exercise creation/update/retries, controlled concurrent publication, external edits immediately before publication and to ancestors afterward, explicit resolution, missing parents, stale tokens, permission failures, uncertain publication results, path exclusions, compatible fields and symlinks. No personal vault or external remote is used.
+
+## Version 2 source dependencies (T13)
+
+Version 1 envelopes remain supported. Version 2 adds required dependencies and
+inherit_from fields. Dependencies map logical memory UUIDs to their complete
+observed revision-ID/SHA-256 snapshot tokens; inherit_from is null or a key in
+that map identifying the compatible metadata source for a new logical record.
+The v1 inner record schema is unchanged. Ordinary evidence updates preserve an
+existing dependency guard. The writer checks source snapshots before publishing;
+semantic readers also validate active correction dependencies after publication.
+This detects late source edits without replacing source files. Historical guards
+are retired when a later explicit record supersedes their correction.
+
+Read-side subject conflicts and effective supersession are resolved by the shared
+memory snapshot. read_record exposes current semantic state; explicit history
+can inspect non-current payloads. read_revision_record exposes only the lower
+revision graph and must not be treated as current advice. New writes are limited
+to 128 KiB so verification and bounded readers agree on supported record size.
+
+Clients reading corrected vaults must support envelope version 2 and semantic
+lifecycle resolution. Version 1 inner records and old revision files are not
+rewritten. Older readers must be upgraded before relying on current recall;
+actual mixed-client/two-device validation remains T21/T22.

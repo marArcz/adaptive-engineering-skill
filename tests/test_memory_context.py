@@ -119,7 +119,7 @@ class ContextTests(unittest.TestCase):
         self.assertFalse(exact['truncated'])
         self.assertEqual(exact['characters'], len(exact['context']))
         self.assertIn('Missing or excluded linked memories: 1', exact['context'])
-        self.add('knowledge', 'Queue sixth evidence.\n')
+        self.add('knowledge', 'Queue sixth evidence.\n', title='Additional queue evidence')
         extra = build_context(self.vault, 'queue')
         self.assertEqual(extra['excerpt_count'], 5)
         self.assertTrue(extra['truncated'])

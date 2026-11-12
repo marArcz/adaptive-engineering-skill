@@ -74,7 +74,29 @@ def decode_record(raw, *, revision=False):
         if not sep or not first.startswith(PREFIX) or not first.endswith(' -->'):
             raise ValueError('invalid revision envelope')
         envelope = json.loads(first[len(PREFIX):-4], object_pairs_hook=_pairs)
-        if set(envelope) != {'version', 'revision_id', 'parents'} or type(envelope['version']) is not int or envelope['version'] != 1:
+        if not isinstance(envelope, dict) or type(envelope.get('version')) is not int:
+            raise ValueError('unsupported revision envelope')
+        fields = {'version', 'revision_id', 'parents'}
+        if envelope['version'] == 2:
+            fields |= {'dependencies', 'inherit_from'}
+            dependencies = envelope.get('dependencies')
+            if not isinstance(dependencies, dict):
+                raise ValueError('invalid dependencies')
+            for key, token in dependencies.items():
+                contract._uuid(key, 'dependency')
+                if not isinstance(token, dict) or not token:
+                    raise ValueError('invalid dependency snapshot')
+                for revision, digest in token.items():
+                    if revision != 'base':
+                        contract._uuid(revision, 'dependency revision')
+                    if not isinstance(digest,str) or not re.fullmatch('[0-9a-f]{64}',digest):
+                        raise ValueError('invalid dependency digest')
+            inherited = envelope.get('inherit_from')
+            if inherited is not None and inherited not in dependencies:
+                raise ValueError('invalid inherited metadata source')
+        elif envelope['version'] != 1:
+            raise ValueError('unsupported revision envelope')
+        if set(envelope) != fields:
             raise ValueError('unsupported revision envelope')
         contract._uuid(envelope['revision_id'], 'revision_id')
         parents = envelope['parents']
@@ -110,15 +132,34 @@ def _nodes(vault, record_id):
             if revision in nodes:
                 raise ValueError('duplicate memory or revision ID')
             nodes[revision] = {'metadata': data, 'body': body, 'digest': _digest(raw),
-                               'parents': envelope['parents'] if envelope else {}}
+                               'parents': envelope['parents'] if envelope else {},
+                               'dependencies': envelope.get('dependencies', {}) if envelope else {}}
     return nodes
 
 
-def read_record(vault, record_id):
+def read_revision_record(vault, record_id):
     """Resolve a snapshot. Conflicts return no current metadata or body."""
     contract._uuid(record_id, 'id')
     nodes = _nodes(Path(vault), record_id)
     return resolve_nodes(nodes)
+
+
+def read_record(vault, record_id, *, history=False):
+    """Inspect semantic current state; explicit history can expose superseded payloads."""
+    raw = read_revision_record(vault, record_id)
+    if raw is None or raw['status'] == 'conflict':
+        return raw
+    from memory_search import memory_snapshot
+    snapshot = memory_snapshot(vault)
+    if snapshot['incomplete']:
+        raise ValueError('semantic record scan incomplete')
+    current = snapshot['resolved'].get(record_id)
+    if current is None:
+        return None
+    if current['metadata']['state'] != 'current':
+        return dict(current, status='historical') if history else {
+            'status': 'not_current', 'token': current['token'], 'state': current['metadata']['state']}
+    return current
 
 
 def resolve_nodes(nodes):
@@ -152,7 +193,7 @@ def resolve_nodes(nodes):
               'token': token, 'tips': tips, 'changed_parents': mismatches}
     if result['status'] == 'current':
         node = nodes[tips[0]]
-        result.update(metadata=node['metadata'], body=node['body'])
+        result.update(metadata=node['metadata'], body=node['body'], dependencies=node.get('dependencies',{}))
     return result
 
 
@@ -207,7 +248,7 @@ class PublicationError(Exception):
 
 
 def write_record(vault, data, body, *, expected_token=None, revision_id=None, resolve=False,
-                 project_roots=(), project_paths=(), device_identifiers=()):
+                 project_roots=(), project_paths=(), device_identifiers=(), dependencies=None, inherit_from=None):
     """Append a revision. Supply the returned snapshot token on updates/resolutions."""
     published = False
     try:
@@ -224,7 +265,9 @@ def write_record(vault, data, body, *, expected_token=None, revision_id=None, re
         gate = capture_gate(vault)
         if not gate.allowed:
             raise ValueError(gate.message)
-        current = read_record(vault, data['id'])
+        current = read_revision_record(vault, data['id'])
+        if dependencies is None and current and current['status']=='current' and current.get('dependencies'):
+            dependencies=current['dependencies']
         token = current['token'] if current else {}
         # Explicit revision IDs make retries deterministic, even after a lost response.
         directory = vault / 'memory/revisions'
@@ -237,7 +280,11 @@ def write_record(vault, data, body, *, expected_token=None, revision_id=None, re
         if not isinstance(parents, dict):
             raise ValueError('invalid snapshot token')
         envelope = {'version': 1, 'revision_id': revision_id, 'parents': parents}
+        if dependencies is not None:
+            envelope.update(version=2, dependencies=dependencies, inherit_from=inherit_from)
         raw = (PREFIX + json.dumps(envelope, sort_keys=True) + ' -->\n' + _serialize(data, body)).encode('utf-8')
+        if len(raw)>128*1024:
+            raise ValueError('record exceeds the supported bounded-reader size')
         if revision_id in token:
             if path.read_bytes() == raw:
                 return {'status': 'unchanged', 'revision_id': revision_id, 'record': current}
@@ -253,14 +300,28 @@ def write_record(vault, data, body, *, expected_token=None, revision_id=None, re
             if previous == data and current['body'] == body:
                 return {'status': 'unchanged', 'record': current}
         elif not current and set(data) - contract.FIELDS:
-            raise ValueError('unknown metadata on new record')
+            if not dependencies or inherit_from not in dependencies:
+                raise ValueError('unknown metadata on new record')
+            inherited = read_revision_record(vault, inherit_from)
+            if inherited is None or inherited['status'] != 'current' or {k:v for k,v in data.items() if k not in contract.FIELDS} != {k:v for k,v in inherited['metadata'].items() if k not in contract.FIELDS}:
+                raise ValueError('compatible metadata must be inherited unchanged')
         gate = capture_gate(vault)
         if not gate.allowed:
             raise ValueError(gate.message)
+        decode_record(raw, revision=True)
+        for key, expected in (dependencies or {}).items():
+            dependent = read_revision_record(vault, key)
+            if dependent is None or dependent['status'] != 'current' or dependent['token'] != expected:
+                raise ValueError('dependency changed since it was read')
         published = _publish(directory, path.name, raw)
-        saved = read_record(vault, data['id'])
+        saved = read_revision_record(vault, data['id'])
         if saved is None or saved['token'].get(revision_id) != _digest(raw):
             raise ValueError('published revision failed verification')
+        if dependencies:
+            from memory_search import memory_snapshot
+            lifecycle = memory_snapshot(vault)
+            if lifecycle['incomplete'] or data['id'] not in lifecycle['resolved'] or data['id'] in lifecycle['semantic_conflicts']:
+                saved = dict(saved, status='conflict')
         return {'status': 'conflict' if saved['status'] == 'conflict' else 'updated' if current else 'created',
                 'revision_id': revision_id, 'record': saved}
     except PublicationError as exc:

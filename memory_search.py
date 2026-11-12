@@ -101,7 +101,8 @@ def _load(vault, max_notes):
                     raise ValueError('duplicate revision')
                 nodes[revision] = {'metadata': data, 'body': body, 'digest': _digest(raw),
                                    'parents': envelope['parents'] if envelope else {},
-                                   'path': path.relative_to(vault).as_posix()}
+                                   'path': path.relative_to(vault).as_posix(),
+                                   'dependencies': envelope.get('dependencies', {}) if envelope else {}}
             except (OSError, UnicodeError, ValueError, TypeError, KeyError, AttributeError):
                 stats['invalid_files'] += 1
                 ids = _identity(raw, path)
@@ -118,6 +119,68 @@ def _load(vault, max_notes):
     if incomplete:
         groups = {}
     return groups, deleted, stats, incomplete, scan_truncated
+
+
+def _subject_key(data):
+    return (data['kind'], data['scope'], data.get('project_id'), ' '.join(data['title'].split()).casefold())
+
+
+def _lifecycle(groups, resolved):
+    """Resolve subject claims without treating import order or timestamps as truth."""
+    conflicts=set()
+    edges={key:set() for key in resolved}
+    for key,record in resolved.items():
+        data=record['metadata']
+        for ref in data['supersedes']:
+            if (ref not in resolved or _subject_key(resolved[ref]['metadata'])!=_subject_key(data)
+                    or data['state']=='unresolved'):
+                conflicts.add(key)
+            else:
+                edges[key].add(ref)
+    superseded=set().union(*edges.values()) if edges else set()
+    pending=set(edges)
+    done=set()
+    while pending:
+        ready={key for key in pending if edges[key] <= done}
+        if not ready:
+            conflicts.update(pending)
+            break
+        pending-=ready
+        done|=ready
+    for key,record in resolved.items():
+        data=record['metadata']
+        if key in superseded or data['state']=='superseded':
+            continue
+        tip=groups[key][record['tips'][0]]
+        for ref,expected in tip.get('dependencies',{}).items():
+            actual=resolved.get(ref)
+            if actual is None or actual['token']!=expected:
+                conflicts.add(key)
+                if ref in resolved:
+                    conflicts.add(ref)
+    subjects={}
+    for key,record in resolved.items():
+        if key not in superseded and record['metadata']['state']!='superseded':
+            subjects.setdefault(_subject_key(record['metadata']),[]).append(key)
+    for keys in subjects.values():
+        values={' '.join(resolved[key]['body'].split()) for key in keys}
+        if len(values)>1:
+            conflicts.update(keys)
+    changed=True
+    while changed:
+        changed=False
+        for key,record in resolved.items():
+            data=record['metadata']
+            if data['basis']!='inferred' or key in conflicts or key in superseded:
+                continue
+            if any(ref not in resolved or ref in superseded or ref in conflicts
+                   or resolved[ref]['metadata']['state']!='current' for ref in data['related_ids']):
+                conflicts.add(key)
+                changed=True
+    for key,record in list(resolved.items()):
+        state='unresolved' if key in conflicts else 'superseded' if key in superseded else record['metadata']['state']
+        resolved[key]=dict(record,metadata=dict(record['metadata'],state=state))
+    return superseded,conflicts
 
 
 def memory_snapshot(vault, max_notes=1500):
@@ -138,10 +201,12 @@ def memory_snapshot(vault, max_notes=1500):
             resolved[key] = current
         except ValueError:
             stats['conflicted_records'] += 1
-    superseded = {ref for current in resolved.values()
-                  for ref in current['metadata']['supersedes']}
+    superseded,semantic_conflicts=_lifecycle(groups,resolved)
+    stats['conflicted_records']+=len(semantic_conflicts)
     return {"groups": groups, "resolved": resolved, "superseded": superseded,
+            "semantic_conflicts":semantic_conflicts,
             "stats": stats, "incomplete": incomplete, "scan_truncated": scan_truncated}
+
 
 
 def search_memory(vault, query='', limit=3, max_notes=1500, *, kind=None, scope=None,
@@ -175,7 +240,8 @@ def search_memory(vault, query='', limit=3, max_notes=1500, *, kind=None, scope=
         candidates = groups[key].items() if history else [(tip, groups[key][tip])]
         for revision, node in candidates:
             data = node['metadata']
-            historical = revision != tip or data['state'] != 'current' or key in superseded
+            semantic=key in snapshot['semantic_conflicts']
+            historical = revision != tip or data['state'] != 'current' or key in superseded or semantic
             if historical and not history:
                 continue
             if kind and data['kind'] != kind:
@@ -196,6 +262,7 @@ def search_memory(vault, query='', limit=3, max_notes=1500, *, kind=None, scope=
             if terms and score == 0:
                 continue
             row = {field: data[field] for field in ('id', 'kind', 'basis', 'state', 'scope')}
+            row['state']='unresolved' if semantic else 'superseded' if key in superseded else data['state']
             if 'project_id' in data:
                 row['project_id'] = data['project_id']
             row.update(title=data['title'][:240], revision_id=revision, path=node['path'], score=score,
