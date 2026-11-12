@@ -1,0 +1,5 @@
+# Vault merge safety
+
+`vault_guard.capture_gate(vault)` checks the vault's Git index without changing it. Capture and memory writers must call it immediately before every mutation and proceed only when `allowed` is true. An unresolved conflict pauses capture; resolve the merge using your normal Git workflow and retry. An unavailable Git executable, inaccessible vault, or failed inspection also blocks capture until inspection succeeds. Non-Git vaults remain supported when Git can confirm they are outside a repository. The check is a snapshot, not a lock against concurrent changes.
+
+`has_conflict_markers` identifies Git-style textual conflict markers. Vault search excludes marked notes and reports the number excluded; other readable notes remain searchable. Textual markers do not identify semantic contradictions between otherwise valid records. Those require separate memory validation. Capture and production memory writers have not yet been implemented and must integrate this gate in their own write path.

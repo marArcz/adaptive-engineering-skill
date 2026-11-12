@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse,json,re
 from pathlib import Path
 from _vault_common import resolve_vault
+from vault_guard import has_conflict_markers
 
 SKIP={'.obsidian','.git','.trash','node_modules','attachments','templates'}
 
@@ -22,7 +23,7 @@ def search(vault:Path,query:str,limit:int=3,max_notes:int=1500)->dict:
     if not vault.is_dir(): raise ValueError(f'Vault directory is missing or inaccessible: {vault}')
     terms=[t.casefold() for t in re.findall(r'[\w.+-]+',query) if len(t)>1]
     if not terms: raise ValueError('Query must contain searchable words')
-    results=[]; seen=0; truncated=False
+    results=[]; seen=0; truncated=False; conflicts=0
     for p in sorted(vault.rglob('*.md')):
         rel=p.relative_to(vault)
         if any(part in SKIP or part.startswith('.') for part in rel.parts):continue
@@ -31,7 +32,10 @@ def search(vault:Path,query:str,limit:int=3,max_notes:int=1500)->dict:
         seen+=1
         try:
             if p.stat().st_size>128*1024:continue
-            content=p.read_text(encoding='utf8')[:16000]
+            content=p.read_text(encoding='utf8')
+            if has_conflict_markers(content):
+                conflicts+=1; continue
+            content=content[:16000]
         except (OSError,UnicodeError):continue
         meta=parse_frontmatter(content)
         status=meta.get('status','unreviewed')
@@ -43,7 +47,7 @@ def search(vault:Path,query:str,limit:int=3,max_notes:int=1500)->dict:
         if score>0:
             results.append({'path':rel.as_posix(),'status':status,'score':int(score),'title':meta.get('title') or rel.stem})
     results.sort(key=lambda x:(-x['score'],x['status']!='approved',x['path']))
-    return {'vault':str(vault),'query':query,'notes_examined':seen,'truncated':truncated,'matches':results[:limit], 'notice':'Candidate notes are unverified; inspect before adopting. Paths, not full note content, are returned.'}
+    return {'vault':str(vault),'query':query,'notes_examined':seen,'truncated':truncated,'conflict_files_excluded':conflicts,'matches':results[:limit], 'notice':'Candidate notes are unverified; inspect before adopting. Paths, not full note content, are returned.'}
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
