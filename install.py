@@ -32,6 +32,8 @@ def main():
     if not a.dry_run:
         dest.parent.mkdir(parents=True,exist_ok=True)
         shutil.copytree(SKILL,dest)
+        for module in ('memory_search.py','memory_store.py','memory_contract.py','memory_boundary.py'):
+            shutil.copyfile(HERE/module,dest/'scripts'/module)
     if a.with_agents:
         root=Path(a.repo).expanduser().resolve(); agents=root/'AGENTS.md'
         if agents.exists():print('Existing AGENTS.md preserved:',agents)

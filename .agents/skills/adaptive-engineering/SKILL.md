@@ -50,6 +50,8 @@ Before proposing any new managed personal-memory write, including learning-deriv
 
 Use the distribution's `memory_boundary.validate_memory_content` on the entire proposal, with known workspace roots, relative project paths and device identifiers supplied only at runtime. Repository URLs and explicit vault-relative memory links may remain. Rejected proposals must be re-summarized; never save the rejected content in an error note. If the helper is unavailable, report that new managed memory persistence is unavailable rather than bypassing the boundary. This does not authorize automatic capture or migrate existing legacy notes. Production writer integration remains forthcoming.
 
+For explicit memory recall or record/relationship lookup, follow [Scoped memory search](references/memory-search.md). Legacy technical-note search remains the default. Search does not activate automatic capture.
+
 ## Read supporting guidance only for the relevant branch
 
 - `references/fallback.md`: **only when fallback is activated**.

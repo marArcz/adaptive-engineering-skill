@@ -65,6 +65,28 @@ def _safe(root, path):
         raise ValueError('unsafe managed destination')
 
 
+def decode_record(raw, *, revision=False):
+    """Decode a complete v1 record or revision envelope without vault access."""
+    text = raw.decode('utf-8')
+    envelope = None
+    if revision:
+        first, sep, text = text.partition('\n')
+        if not sep or not first.startswith(PREFIX) or not first.endswith(' -->'):
+            raise ValueError('invalid revision envelope')
+        envelope = json.loads(first[len(PREFIX):-4], object_pairs_hook=_pairs)
+        if set(envelope) != {'version', 'revision_id', 'parents'} or type(envelope['version']) is not int or envelope['version'] != 1:
+            raise ValueError('unsupported revision envelope')
+        contract._uuid(envelope['revision_id'], 'revision_id')
+        parents = envelope['parents']
+        if not isinstance(parents, dict) or any(not isinstance(v, str) or not re.fullmatch('[0-9a-f]{64}', v) for v in parents.values()):
+            raise ValueError('invalid revision parents')
+        for parent in parents:
+            if parent != 'base':
+                contract._uuid(parent, 'parent')
+    data, body = _record(text)
+    return data, body, envelope
+
+
 def _nodes(vault, record_id):
     root = vault / 'memory'
     if not vault.is_dir() or not root.is_dir():
@@ -79,23 +101,7 @@ def _nodes(vault, record_id):
         for path in sorted(folder.rglob('*.md')):
             _safe(vault, path)
             raw = path.read_bytes()
-            text = raw.decode('utf-8')
-            envelope = None
-            if area == 'revisions':
-                first, sep, text = text.partition('\n')
-                if not sep or not first.startswith(PREFIX) or not first.endswith(' -->'):
-                    raise ValueError('invalid revision envelope')
-                envelope = json.loads(first[len(PREFIX):-4], object_pairs_hook=_pairs)
-                if set(envelope) != {'version', 'revision_id', 'parents'} or type(envelope['version']) is not int or envelope['version'] != 1:
-                    raise ValueError('unsupported revision envelope')
-                contract._uuid(envelope['revision_id'], 'revision_id')
-                parents = envelope['parents']
-                if not isinstance(parents, dict) or any(not isinstance(v, str) or not re.fullmatch('[0-9a-f]{64}', v) for v in parents.values()):
-                    raise ValueError('invalid revision parents')
-                for parent in parents:
-                    if parent != 'base':
-                        contract._uuid(parent, 'parent')
-            data, body = _record(text)
+            data, body, envelope = decode_record(raw, revision=area == 'revisions')
             if data['id'] != record_id:
                 continue
             revision = envelope['revision_id'] if envelope else 'base'
@@ -112,6 +118,11 @@ def read_record(vault, record_id):
     """Resolve a snapshot. Conflicts return no current metadata or body."""
     contract._uuid(record_id, 'id')
     nodes = _nodes(Path(vault), record_id)
+    return resolve_nodes(nodes)
+
+
+def resolve_nodes(nodes):
+    """Resolve already validated nodes from one logical record."""
     if not nodes:
         return None
     ancestors = {}
