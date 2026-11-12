@@ -52,6 +52,8 @@ Use the distribution's `memory_boundary.validate_memory_content` on the entire p
 
 For explicit memory recall or record/relationship lookup, follow [Scoped memory search](references/memory-search.md). Legacy technical-note search remains the default. Search does not activate automatic capture. For startup context, task excerpts or an inspectable profile view, follow [Compact memory context](references/memory-context.md); supply only its bounded context text to the agent.
 
+For structured active-skill capture proposals, follow [Selective capture](references/memory-capture.md). The capture API enforces policy and conservative deduplication; T16 still owns conversation workflow activation.
+
 ## Read supporting guidance only for the relevant branch
 
 - `references/fallback.md`: **only when fallback is activated**.
