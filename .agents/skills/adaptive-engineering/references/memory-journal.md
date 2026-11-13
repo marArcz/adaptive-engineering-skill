@@ -1,6 +1,6 @@
 # Selective experience journal
 
-The root or standalone bundled `memory_journal` module provides journal, inspect_experience and related_experiences. It captures short sourced accounts of meaningful shared experiences, not per-turn logs. The trusted active workflow classifies significance and evidence; T16 owns invocation and T20 owns live selection-quality checks.
+The root or standalone bundled `memory_journal` module provides journal, inspect_experience and related_experiences. It captures short sourced accounts of meaningful shared experiences, not per-turn logs. The trusted active-session workflow classifies significance and evidence and invokes the selected operation; T20 owns fresh live selection-quality checks.
 
 ```python
 result = journal(

@@ -1,6 +1,6 @@
 # Factual, preference and project operations
 
-The distribution-root or standalone bundled `memory_operations` module exposes remember, inspect_record, register_project, associate_project and continue_project. These are structured operation adapters for the later conversational workflow, not a natural-language parser. T16 owns automatic invocation; no operation here starts background capture or Git synchronization.
+The distribution-root or standalone bundled `memory_operations` module exposes remember, inspect_record, register_project, associate_project and continue_project. The active-session skill selects these structured operations from natural-language requests and meaningful capture candidates; the adapters are not a natural-language parser. No operation here starts background capture or Git synchronization.
 
 ## Remember and inspect
 

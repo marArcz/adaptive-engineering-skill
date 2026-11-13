@@ -1,6 +1,6 @@
 # Bounded memory consolidation
 
-Use the root or standalone bundled `memory_consolidation` API only while this skill is active. Supply the trusted privacy classification flags used by capture, runtime path exclusions, and explicit sensitive-retention authorization when applicable. Paused capture, merge gates and the shared capture lock also govern maintenance. T16 owns conversation workflow activation; there is no scheduler.
+Use the root or standalone bundled `memory_consolidation` API only while this skill is active. Supply the trusted privacy classification flags used by capture, runtime path exclusions, and explicit sensitive-retention authorization when applicable. Paused capture, merge gates and the shared capture lock also govern maintenance. The core session workflow invokes bounded maintenance when appropriate; there is no scheduler.
 
 ```python
 from memory_consolidation import plan_consolidation, consolidate

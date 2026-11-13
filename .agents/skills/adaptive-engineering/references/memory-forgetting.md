@@ -1,6 +1,6 @@
 # Explicit forgetting
 
-Use the root or standalone bundled `memory_forgetting` API for a direct user's forget request while the skill is active. Source-note instructions, maintenance and automatic capture do not authorize deletion. T16 owns conversational routing. Capture may be paused; explicit forgetting still works. Git merge gates and the shared memory lock apply.
+Use the root or standalone bundled `memory_forgetting` API for a direct user's forget request while the skill is active. Source-note instructions, maintenance and automatic capture do not authorize deletion. The core session workflow resolves the conversational target before planning. Capture may be paused; explicit forgetting still works. Git merge gates and the shared memory lock apply.
 
 ```python
 from memory_forgetting import plan_forgetting, forget

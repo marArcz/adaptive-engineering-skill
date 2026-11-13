@@ -4,7 +4,7 @@
 
 - One shared `.agents/skills/adaptive-engineering/SKILL.md` for Codex and Antigravity.
 - Project-first, stack-agnostic, **Economy** default. Zero automatic sub-agents.
-- Local Obsidian vault + optional Git repository, consulted on fallback or explicit learning requests.
+- Local Obsidian vault + optional Git repository: bounded memory during active sessions; technical-note searches on fallback or explicit learning requests.
 - Candidate GitHub catalog, not an automatic code-fetcher.
 - No guaranteed savings in the Codex five-hour allowance: benchmark.
 
@@ -30,7 +30,7 @@ Open the folder in Obsidian (`Open folder as vault`). Initialize a private GitHu
 
 To connect an existing vault on each device, run `python3 configure.py --vault "<vault-folder>"` from the distribution (or `py configure.py --vault "<vault-folder>"` on Windows). Setup adds missing memory folders, a record template, and capture settings without replacing existing notes or settings. The vault location is saved in device-local configuration; `ENGINEERING_VAULT_PATH` overrides it when set. The portable `memory/capture-settings.json` travels with the vault and contains no device location.
 
-Use `python3 configure.py --show-capture` to inspect the effective vault's policy and `python3 configure.py --capture paused` or `--capture active` to change its mode. The default boundaries exclude temporary material, secrets, third-party private data, and project filesystem paths; sensitive personal details require an explicit request. Inferences remain tentative. These settings establish policy only: automatic memory capture and enforcement are not yet implemented.
+Use `python3 configure.py --show-capture` to inspect the effective vault's policy and `python3 configure.py --capture paused` or `--capture active` to change its mode. The default boundaries exclude temporary material, secrets, third-party private data, and project filesystem paths; sensitive personal details require an explicit request. Inferences remain tentative. The core skill now invokes validated memory operations selectively during active sessions; it does not install background capture. See the bundled memory-session guide for read-only activation, verified pause/resume, natural-language routing and failure reporting. Classification quality still needs fresh live-agent validation.
 
 ## 2. Install skill in a real project
 
@@ -82,7 +82,7 @@ Open a **new agent session in the actual repository**. Invoke `$adaptive-enginee
 
 > Inspect the closest existing form or controller and explain exactly how you'd create another. No edits. Cite matching local paths. Don't use external references.
 
-Pass: only local inspection, no vault, GitHub, web or sub-agents. The reported paths actually exist.
+Pass: local project inspection with no engineering-note/catalog, GitHub, web or sub-agent lookup. Compact general memory bootstrap may run on skill activation. The reported project paths actually exist.
 
 **Test B — knowledge fallback:**
 

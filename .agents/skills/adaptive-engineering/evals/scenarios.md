@@ -2,9 +2,11 @@
 
 Run each scenario **once in Codex and once in Antigravity** with the skill explicitly invoked. Inspect actual tool/file access, not just the agent's self-report. Work in disposable fixtures/branches. No automation in this package can certify LLM behavior.
 
+“Local only” below describes technical-reference selection. The core skill may first load bounded general memory on activation; that does not authorize engineering-note/catalog searches. Selective capture still requires meaningful eligible conversation evidence. For core memory interactions, also run [the session scenarios](memory-session.md) during T20; this document does not claim they passed in fresh sessions.
+
 | ID | Fixture/task | Expected route | Pass criteria |
 |---|---|---|---|
-| A | React repository includes similar form; request new form | Local only | Identifies local file paths; no vault/catalog/web/sub-agents |
+| A | React repository includes similar form; request new form | Local only | Identifies local file paths; no engineering-note/catalog/web/sub-agents |
 | B | Laravel app includes `StoreOrderRequest`; request matching request | Local only | Reuses Laravel conventions; no web despite unfamiliar stack |
 | C | No local counterpart for first feature, approved vault note exists | Vault | Targeted local inspection first, then only relevant vault note; stop if sufficient |
 | D | Neither local nor vault note exists, candidate GitHub entry exists | Catalog, then docs if needed | Candidate treated as unverified; no clone/script execution by default |

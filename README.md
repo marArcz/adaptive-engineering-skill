@@ -2,6 +2,8 @@
 
 An **implementable, stack-agnostic, project-first, cost-aware Agent Skill**. No sub-agent is bundled: single-agent Economy is the default.
 
+The personal-memory branch adds an [active-session memory workflow](.agents/skills/adaptive-engineering/references/memory-session.md): compact profile/working-style recall, selective capture, and natural-language remember, inspect, continue-project, correct, consolidate, forget and pause/resume interactions. Capture operates only while the skill is active and within the saved boundaries. There are no background hooks or automatic Git sync; fresh-agent and actual-device acceptance remain separate checks.
+
 Coding, debugging, refactoring, and review require the separate [code simplicity and evidence policy](.agents/skills/adaptive-engineering/references/code-simplicity.md): minimal changes, justified validation, reuse, and verified assumptions.
 
 ## Contents
@@ -136,7 +138,7 @@ Search scripts return compact local JSON. `--scope app` assumes that directory e
 ## Design constraints
 
 - Web research is permitted on the fallback branch or an explicit learning request.
-- No automatic vault writes during ordinary engineering. Explicit learning authorizes relevant notes and GitHub catalog updates, but not approval, Git commits/pushes, or repository cloning/fetching.
+- While the skill is active, managed-memory capture follows the configured boundaries and validated operations. Legacy candidate-note/catalog writes require explicit learning. Neither authorizes knowledge approval, vault Git operations, or repository cloning/fetching.
 - The repository catalog includes *candidate* URLs only; commits and versions are not pre-verified.
 - Python unit tests verify local tools/installer. Agent selection and true Codex allowance savings need live testing; see evals.
 

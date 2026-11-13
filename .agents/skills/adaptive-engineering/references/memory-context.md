@@ -8,7 +8,7 @@ python3 memory_context.py --view profile
 python3 memory_context.py --instructions 'Use detailed explanations for this request.'
 ```
 
-Replace the project placeholder with a real stable UUID. Source-distribution paths and installed-script paths differ; the command itself and flags are the same. `--vault` is optional when already configured. This helper is read-only and does not automatically run at startup; T16 owns workflow integration.
+Replace the project placeholder with a real stable UUID. Source-distribution paths and installed-script paths differ; the command itself and flags are the same. `--vault` is optional when already configured. This helper is read-only. The active-session workflow invokes memory_session.activate once for general bootstrap, then this helper for relevant recall; neither installs a startup hook.
 
 The API is `build_context(vault, query='', project_id=None, current_instructions='', max_chars=12000, max_excerpts=5, max_notes=1500, view='context')`. Keyword arguments follow `query`. Its `context` field is the sole text intended for model context; other return fields are diagnostic counters and selected IDs. Do not append a second copy of bodies or the whole diagnostics object and claim it remains within this helper's budget.
 

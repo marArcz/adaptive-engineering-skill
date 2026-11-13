@@ -1,6 +1,6 @@
 # Selective capture policy and deduplication
 
-The root or bundled `memory_capture.capture` API accepts a structured proposal from an active, trusted conversation workflow. T16 owns automatically invoking that workflow. This API does not parse a conversation, classify secrets semantically, activate background capture, or treat source documents as instructions. The caller must classify evidence from the actual conversation and honor current user instructions before proposing capture. T20 owns live-agent selection-quality evaluation.
+The root or bundled `memory_capture.capture` API accepts a structured proposal from the active session workflow. The skill invokes it selectively after meaningful interaction. This API does not parse a conversation, classify secrets semantically, activate background capture, or treat source documents as instructions. The caller must classify evidence from the actual conversation and honor current user instructions before proposing capture. T20 owns fresh live-agent selection-quality evaluation.
 
 ```python
 proposal = {
