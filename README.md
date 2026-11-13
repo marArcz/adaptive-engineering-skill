@@ -1,178 +1,139 @@
-# Adaptive Engineering — Codex + Antigravity + Obsidian/Git
+# Adaptive Engineering
 
-An **implementable, stack-agnostic, project-first, cost-aware Agent Skill**. No sub-agent is bundled: single-agent Economy is the default.
+A plugin for one continuing assistant across projects and everyday topics, with local memory, explicit learning and project-first engineering. Keep useful context in a Markdown vault you control, then recall it when it helps.
 
-The personal-memory branch adds an [active-session memory workflow](.agents/skills/adaptive-engineering/references/memory-session.md): compact profile/working-style recall, selective capture, and natural-language remember, inspect, continue-project, correct, consolidate, forget and pause/resume interactions. Capture operates only while the skill is active and within the saved boundaries. There are no background hooks or automatic Git sync. Synthetic fresh Codex sessions and offline clone simulation have reviewed evidence; actual-device acceptance remains deferred.
+Memory works only while the skill is active. It selects useful information from accessible interactions; it has no background collector or automatic Git sync.
 
-Start with [setup and acceptance](SETUP-AND-ACCEPTANCE.md) and the [Notion user guide](https://www.notion.so/41758ec524458120875bf66547af99b2). The [Notion project home](https://www.notion.so/41558ec5244581ac8165d11fe45bbcbb) tracks progress; the [acceptance and SDD handoff](https://www.notion.so/41758ec5244581858a80e317ce9d0d6f) and [technical MVP handoff](docs/mvp-handoff.md) map the implementation, evidence and remaining gates. Full MVP acceptance is **Blocked** pending actual two-device execution and the outstanding host checks.
+[User guide](https://www.notion.so/41758ec524458120875bf66547af99b2) · [Setup checklist](SETUP-AND-ACCEPTANCE.md) · [Project home](https://www.notion.so/41558ec5244581ac8165d11fe45bbcbb)
 
-Coding, debugging, refactoring, and review require the separate [code simplicity and evidence policy](.agents/skills/adaptive-engineering/references/code-simplicity.md): minimal changes, justified validation, reuse, and verified assumptions.
+## What it does
 
-## Contents
+- **Remember useful context:** preferences, goals, decisions, progress, commitments and open questions, with sources and general/project scope.
+- **Continue across sessions:** load a compact user profile and assistant working style, then retrieve bounded task context on demand.
+- **Keep selected experiences:** journal meaningful decisions, outcomes and collaboration feedback; label inferred lessons tentative.
+- **Manage memory:** inspect, correct, consolidate exact duplicates and explicitly forget managed records and their linked dependencies.
+- **Learn deliberately:** save source-labelled general knowledge or engineering candidates without replacing reviewed notes.
+- **Work with the project:** inspect local patterns first, make small coherent changes and validate what changed. One agent is the default.
 
-- `.agents/skills/adaptive-engineering/SKILL.md`: compact project-first workflow
-- `references/`: code simplicity, explicit learning, conditional fallback, project discovery, validation, cost/delegation
-- `scripts/inspect_project.py`: bounded root-manifest detection
-- `scripts/find_patterns.py`: targeted, bounded source search
-- `scripts/search_vault.py`: local Obsidian Markdown search (compact results)
-- `scripts/search_catalog.py`: GitHub metadata lookup **without network access**
-- `vault-template/`: Obsidian Markdown template, candidate repo catalog and `.gitignore`
-- `init_vault.py`, `configure.py`, `install.py`: non-overwriting setup tools
-- `distribution.py`, `package_release.py`: shared runtime inventory and tracked-source bundle build/verification
-- `tests/`: offline stdlib checks; skill `evals/`: live-agent scenarios, with a [developer runner and evidence guide](docs/live-agent-evaluation-v1.md)
+## Requirements and current status
 
-## Requirements
+Python 3.9+ and local filesystem access are required; the Python tools use the standard library. Safe memory/candidate publication additionally requires Git for merge inspection and POSIX directory handles, no-follow opens, hard links, directory flushing and locking. Unsupported writes fail explicitly. Obsidian is optional.
 
-Python 3.9+ (standard library only) and local filesystem access. Setup and read-only tools can run separately, but safe memory/candidate publication requires Git for merge inspection and POSIX directory handles, no-follow opens, hard links, directory flushing and capture locking. Unsupported writes fail explicitly. Obsidian and Git-backed vault versioning are optional; synchronization is manual. The installer targets below are exercised on Linux, not native Windows/macOS or live Codex/Antigravity hosts. No scripts download or execute code from the internet.
+Linux installer layouts, synthetic fresh Codex sessions and offline clone synchronization have reviewed evidence. Antigravity live behavior, native Windows/macOS writes and actual two-device continuity remain unverified. T22 device execution is user-deferred, so full MVP acceptance remains **Blocked**. See the [acceptance and SDD handoff](https://www.notion.so/41758ec5244581858a80e317ce9d0d6f).
 
-## Codex marketplace installation
+This README describes the current personal-memory branch. The manifest still says `0.4.1`; this does not establish that the published `v0.4.1` release or a default marketplace install includes these changes. Use the exact reviewed local build when testing this branch.
 
-Add this repository as a marketplace, then install its plugin:
+## Install
+
+### Codex marketplace
+
+With a Codex CLI that supports plugin commands:
 
 ```bash
 codex plugin marketplace add marArcz/adaptive-engineering-skill
 codex plugin add adaptive-engineering@adaptive-engineering
 ```
 
-Start a new Codex session after installation. You can also browse the marketplace through `/plugins`. Access to a private repository requires Git credentials with permission to read it.
+Start a new session after installation. A private repository requires authorized Git access. These commands use the marketplace's available source; check its revision before assuming branch features are present. For a reviewed local checkout, use `codex plugin marketplace add /absolute/path/to/adaptive-engineering-skill` instead of the GitHub source, then install the same plugin selector.
 
-For local development, run `codex plugin marketplace add /absolute/path/to/adaptive-engineering-skill` instead of adding the GitHub source. The marketplace is named `adaptive-engineering`; its single plugin uses the same name. The supported `.codex-plugin/plugin.json` manifest points at the existing `.agents/skills/` directory, keeping one skill source for marketplace and standalone installation.
+The plugin bundles `adaptive-engineering` and `setup-vault`, with no MCP server or hooks. Choose marketplace or standalone installation for Codex to avoid loading duplicate copies. Marketplace source configuration is described in the [official OpenAI plugin documentation](https://developers.openai.com/plugins/build/plugins).
 
-The plugin includes no MCP server, hooks, or service connection. Choose marketplace installation or the standalone installer for Codex to avoid loading duplicate copies. Both modes include the same adaptive-engineering and setup-vault skills. The standalone installer remains available for Antigravity and repository-local use; installing it does not create/configure a vault or enable a background process.
+### Standalone or local tested build
 
-### Guided vault setup after installation
+From a trusted checkout or extracted verified archive containing this branch, preview installation into an **existing** project:
 
-Run **Setup** for Adaptive Engineering in the plugin interface where available, or ask Codex:
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 install.py --target repo --repo "<existing-project>" --with-agents --dry-run
+PYTHONDONTWRITEBYTECODE=1 python3 install.py --target repo --repo "<existing-project>" --with-agents
+```
+
+Both skills install into the project's `.agents/skills/`. An existing `AGENTS.md` is preserved; merge relevant guidance from [AGENTS.example.md](AGENTS.example.md) yourself if needed. Existing skill destinations are refused rather than overwritten. Inspect partial destinations after an interrupted install before retrying.
+
+Global targets are `codex-global`, `antigravity-global` and `antigravity-cli-global`; see [setup](SETUP-AND-ACCEPTANCE.md) for locations and host details. Installation alone neither connects a vault nor starts memory. Restart the host and verify which skill/helper files loaded.
+
+## Set up your vault
+
+Ask the installed plugin:
 
 > Set up the Adaptive Engineering vault.
 
-The bundled onboarding skill checks your current configuration, then offers to create a vault (suggested location: `~/Dev/engineering-vault`), connect an existing folder, or skip. It runs the setup tools from the installed plugin, so users do not need to clone this repository or find its cache directory. Choosing a destination authorizes setup without another confirmation. A working configuration is reused on later runs.
+Setup checks configuration and offers to **create a vault**, **connect an existing folder**, or **skip**. A suggested location is `~/Dev/engineering-vault`. Choosing the destination authorizes its setup. Keep the vault outside the plugin cache and preferably outside project repositories. Existing notes and capture settings are preserved.
 
-The vault stays outside the plugin cache, and its path is saved in `~/.adaptive-engineering/config.json`. An existing `ENGINEERING_VAULT_PATH` environment variable takes precedence; the flow reports conflicts. Obsidian is optional. Setup does not initialize Git or publish anything.
-
-After setup, ask `Use Adaptive Engineering to learn this` or `learn <topic>`. If learning is requested before setup, the agent offers this flow and resumes once the vault is ready. Setup requires Python and local filesystem tools; it does not run automatically just because the plugin is installed.
-
-To refresh a Git-backed installation:
+For manual setup, run the bundled tools from the trusted distribution:
 
 ```bash
-codex plugin marketplace upgrade adaptive-engineering
-codex plugin add adaptive-engineering@adaptive-engineering
+PYTHONDONTWRITEBYTECODE=1 python3 init_vault.py --path "<device-local-vault>"
+PYTHONDONTWRITEBYTECODE=1 python3 configure.py --vault "<device-local-vault>"
+PYTHONDONTWRITEBYTECODE=1 python3 configure.py --show
+PYTHONDONTWRITEBYTECODE=1 python3 configure.py --show-capture
 ```
 
-Restart Codex afterward. Marketplace setup follows the [official plugin packaging guide](https://developers.openai.com/plugins/build/plugins); this repository marketplace is separate from the public plugin directory.
+To connect an existing vault, start with `configure.py --vault`. Setup adds missing memory scaffolding without replacing existing content. Open the folder in Obsidian if desired. Git initialization, commits, remote setup and pushes are separate actions.
 
-## Quick start (Windows PowerShell)
+Vault resolution is explicit `--vault` where a helper supports it, then `ENGINEERING_VAULT_PATH`, then device-local `~/.adaptive-engineering/config.json`. An environment override can select a different vault from the saved configuration; check the effective destination. No tool searches your home for a vault or silently chooses another one.
 
-Download the release ZIP and `cd` into its extracted `adaptive-engineering-<tag>` folder. Adjust paths:
+Repeat installation/configuration for each device and OS user; Windows and WSL are separate. Local configuration stays on that device. Portable `memory/capture-settings.json` travels with the vault.
 
-```powershell
-# Preview then create the Obsidian vault (optional Git init; no push)
-py init_vault.py --path "C:\Dev\engineering-vault" --dry-run
-py init_vault.py --path "C:\Dev\engineering-vault" --git-init
+## Use it in conversation
 
-# Configure local vault path in your user profile (not the project repo)
-py configure.py --vault "C:\Dev\engineering-vault"
-py configure.py --show
+Say “Use Adaptive Engineering,” or invoke `$adaptive-engineering` in Codex. In Antigravity, explicitly name the skill or use `/adaptive-engineering` where available. The agent starts with read-only, bounded recall; activation alone does not prove a save or writable storage.
 
-# Preview then install into an EXISTING project for both Codex and Antigravity
-py install.py --target repo --repo "C:\Dev\my-project" --with-agents --dry-run
-py install.py --target repo --repo "C:\Dev\my-project" --with-agents
+These are natural-language requests, not shell commands:
 
-# Test deterministic scripts
-py -m unittest discover -s tests -v
-```
+| Request | Expected behavior |
+| --- | --- |
+| “Remember that I prefer concise explanations.” | Retain an eligible user-stated preference and verify the save. |
+| “What do you know about me? Show sources and scope.” | Return the general user profile, separate from project facts and assistant working style. |
+| “Recall our decision about this feature.” | Retrieve relevant scoped context: at most five excerpts within 12,000 total characters. |
+| “Continue this project.” | Resolve its portable identity and recall decisions, progress and open questions. |
+| “That preference changed; I now want more detail.” | Correct current guidance while preserving history; clarify competing claims. |
+| “Consolidate repetitive memory.” | Combine equivalent exact duplicates and retain meaningful differences and old experiences. |
+| “Forget this preference.” | Review the target/linked impact and remove the authorized managed closure. |
+| “Learn this” / “Learn about this topic.” | Save source-labelled knowledge or an engineering candidate; research when needed. |
+| “Journal this decision and its outcome.” | Keep a short sourced significant experience, with any inferred lesson labelled tentative. |
+| “Pause remembering” / “Resume remembering.” | Verify saved capture mode; a failed persistent pause still applies locally. |
+| “Stop using memory in this session.” | End recall and capture for this session without deleting stored records. |
 
-In Obsidian: **Open folder as vault** → select `C:\Dev\engineering-vault`. The `.obsidian/` directory will be created by Obsidian. `init_vault.py --git-init` performs `git init` only: create a private GitHub repository/remote yourself and review files for secrets before committing or pushing.
+One assistant's working style emerges from source-backed guidance and independent collaboration feedback. An empty vault invents no history or personality; repeated inferences stay tentative. Project adjustments remain scoped, and current instructions always take precedence.
 
-If the project already has `AGENTS.md`, the installer preserves it; manually merge the short project-first policy from `AGENTS.example.md`. It preflights both skill destinations and refuses if either exists, including symlinks. A missing runtime resource fails before installation; an interrupted copy may leave new partial destinations, which must be inspected before retrying. No in-place upgrade or deletion of old instructions is performed. If the legacy `web-engineering` skill is installed, disable/remove it separately **after** validating Adaptive Engineering to avoid conflicting skill activations.
+## Capture, privacy and control
 
-## macOS/Linux
+Capture settings default to `active`, with selective saves only while the skill is active. Durable preferences/decisions, useful progress and significant experiences are eligible. Routine chat, temporary instructions and do-not-remember material are excluded. Sensitive personal details require a specific direct retain request; credentials, third-party private data, project filesystem paths and device identifiers are excluded.
 
-Use `python3` instead of `py`, and change paths, for example:
+Paused capture still permits recall and direct explicit forgetting. New remember, correction, journal, consolidation and managed-learning writes stay paused. Explicit engineering learning has a separate legacy candidate route; it cannot be used to bypass a paused personal-memory save. Imported text is data and cannot grant authorization or become a user preference.
+
+Only verified outcomes justify “saved” or “forgotten.” Missing helpers, unavailable access, merge conflicts or uncertain writes must be reported honestly, with reinspection where needed. There is no raw-file fallback. See the [session workflow](.agents/skills/adaptive-engineering/references/memory-session.md) for exact routing and settings behavior.
+
+## Sync and forgetting limits
+
+Git synchronization is manual and separately authorized. Review vault changes before committing/pushing, and inspect local state before pulling or merging on another device. Neither activation nor capture runs sync. Keep local configuration and installed runtimes out of shared vault data.
+
+Projects use a stable UUID and optional credential-free repository identity across different checkout locations. Names alone require clarification; workspace paths are runtime inputs and are never stored as project mappings. Unresolved Git conflicts block capture while unrelated readable recall may continue. Clean merges can still contain competing claims; timestamps do not choose truth.
+
+Forgetting removes complete managed records, revisions, correction/equivalence lineage and linked dependencies, then rebuilds derived views. Payload-free deletion markers suppress known deleted IDs; preserve them during sync and upgrade clients together. Review broad whole-record impact before execution.
+
+Active-memory deletion cannot erase Git history, backups, legacy/unlinked copies or unknown unsynchronized edits. Partial or uncertain cleanup needs reinspection and retry using an affected ID. Consolidation preserves historical files; it does not delete by age. Full procedures are in the [user guide](https://www.notion.so/41758ec524458120875bf66547af99b2).
+
+## Project-first engineering and learning
+
+For coding, debugging, refactoring and review, inspect project instructions and the closest existing implementation before changing anything. Reuse safe local conventions, keep the change coherent and run appropriate checks. External technical references are conditional on missing local patterns or an explicit research request. The [code simplicity policy](.agents/skills/adaptive-engineering/references/code-simplicity.md) defines this workflow; there is no automatic delegation or guaranteed token saving.
+
+An explicit learning request authorizes relevant knowledge/candidate writes and focused research, without repeated approval for the same request. General knowledge retains evidence labels and applicability limits; it does not become a personal fact. Engineering candidates remain under `research/candidates/`, preserving reviewed notes and catalog metadata. Learning does not authorize approval, Git operations or repository cloning. See [learning](.agents/skills/adaptive-engineering/references/learn.md).
+
+## Validate and develop
+
+From a trusted source checkout or extracted distribution, choose unused report paths:
 
 ```bash
-python3 init_vault.py --path "$HOME/Dev/engineering-vault" --git-init
-python3 configure.py --vault "$HOME/Dev/engineering-vault"
-python3 install.py --target repo --repo "$HOME/Dev/my-project" --with-agents
-python3 -m unittest discover -s tests -v
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+PYTHONDONTWRITEBYTECODE=1 python3 run_acceptance.py \
+  --output /tmp/ae-acceptance.json --markdown /tmp/ae-acceptance.md
 ```
 
-## Global installation (after repository tests)
+The reviewed 2026-11-13 snapshot passed 169 offline tests, with passing deterministic evidence for 13 of 14 checks; A11 requires actual devices. This is a dated evidence snapshot, not a promise about every future checkout or full product acceptance.
 
-```bash
-python install.py --target codex-global
-python install.py --target antigravity-global
-# For the separate Antigravity CLI global location, instead use:
-python install.py --target antigravity-cli-global
-```
-
-The installer targets `~/.agents/skills/adaptive-engineering/` for Codex, `~/.gemini/config/skills/adaptive-engineering/` for Antigravity App/IDE, and `~/.gemini/antigravity-cli/skills/adaptive-engineering/` for Antigravity CLI, with setup-vault beside it. Repository-local `my-project/.agents/skills/` is the shared alternative. The main skill's scripts directory contains all memory modules, init_vault.py, configure.py and vault-template, so setup works after the distribution checkout is unavailable. Resources are resolved from the loaded skill, never the active project's helper names. Agents may need a new session for discovery. Windows and WSL have separate user configuration; safe memory writes currently require the POSIX capabilities described above.
-
-## Try it
-
-Open the existing project in each coding agent and explicitly invoke the skill:
-
-- Codex: `$adaptive-engineering Find the closest existing validation pattern and report paths only. Do not edit code.`
-- Antigravity: `/adaptive-engineering Find the closest existing validation pattern and report paths only. Do not edit code.` (if available in your Antigravity interface; you can also explicitly say "Use the adaptive-engineering skill")
-
-First test local-only behavior, then a missing-pattern case that requires the vault, then explicit current-doc research. See `.agents/skills/adaptive-engineering/evals/scenarios.md`.
-
-## Learn and save knowledge
-
-After configuring an existing vault, ask the agent:
-
-- `$adaptive-engineering learn this` — summarize relevant supplied material or conversation into a note.
-- `$adaptive-engineering learn <topic>` — research authoritative sources and save bounded findings.
-- `$adaptive-engineering learn this study-planning explanation` — retain non-coding knowledge with explicit evidence and applicability limits.
-- `$adaptive-engineering learn from <GitHub URL>` — save findings plus a repository catalog entry.
-
-These are natural-language requests, not shell commands. The agent follows [the learning workflow](.agents/skills/adaptive-engineering/references/learn.md). Your request authorizes relevant writes without another confirmation. General subjects use managed knowledge with user-claim, inspected-source or inferred evidence labels; they do not become profile facts. The engineering route keeps searchable legacy candidates under `research/candidates/`: identical snapshots are reused and refreshed material gets a new snapshot without replacing reviewed notes. Neither route automatically approves knowledge or permits project paths/secrets. GitHub catalog updates remain separate verified steps, preserving reviewed metadata. Commits and pushes require separate authorization. A missing or inaccessible vault must be resolved before saving.
-
-## Script examples
-
-```bash
-python .agents/skills/adaptive-engineering/scripts/inspect_project.py .
-python .agents/skills/adaptive-engineering/scripts/find_patterns.py --repo . --scope app --query "store" --limit 5
-python .agents/skills/adaptive-engineering/scripts/search_vault.py --query "validation" --limit 3
-python .agents/skills/adaptive-engineering/scripts/search_catalog.py --query "laravel project structure" --limit 3
-```
-
-Search scripts return compact local JSON. `--scope app` assumes that directory exists; use an appropriate directory for your project. The vault is discovered from `ENGINEERING_VAULT_PATH` environment variable or from `~/.adaptive-engineering/config.json` (or explicitly via `--vault`). Without those configurations, lookup reports an error rather than guessing.
-
-## Design constraints
-
-- Web research is permitted on the fallback branch or an explicit learning request.
-- While the skill is active, managed-memory capture follows the configured boundaries and validated operations. Legacy candidate-note/catalog writes require explicit learning. Neither authorizes knowledge approval, vault Git operations, or repository cloning/fetching.
-- The repository catalog includes *candidate* URLs only; commits and versions are not pre-verified.
-- Python unit tests verify local tools/installer. Agent selection and true Codex allowance savings need live testing; see evals.
-
-## Publishing a release
-
-The [release workflow](.github/workflows/release.yml) runs when a version tag is pushed. It runs the unit suite, uses package_release.py to build an installable ZIP, runs the extracted suite and isolated setup checks for all four installer targets, then publishes a GitHub Release with `adaptive-engineering-<tag>.zip` and `SHA256SUMS`. The shared inventory includes all memory/setup modules, both skills and references, manifests, assets, vault templates, docs and tests. Git history, workflows, caches/bytecode, environment files, personal vaults and untracked files are excluded. Existing artifacts are not overwritten.
-
-For local verification from a committed tree, without tagging or publishing:
-
-```bash
-python3 package_release.py build --tag v0.4.1-local --ref HEAD --output /tmp/adaptive-engineering-v0.4.1-local.zip
-python3 package_release.py verify /tmp/adaptive-engineering-v0.4.1-local.zip
-```
-
-The label names the local ZIP; it does not create a Git tag or change the manifest version. Build can also take a staged Git tree ID through --ref for precommit verification. Verification uses disposable vaults and Python fixture-home overrides, leaves user installations/configuration alone, and runs installed tools in isolated interpreters. It does not certify live host discovery, fresh-agent behavior or two-device continuity. Verify only an archive built from trusted source: the test command executes its packaged scripts.
-
-After committing and pushing the intended changes, tag the release commit:
-
-```bash
-read -r -p "Release tag (vMAJOR.MINOR.PATCH): " release_tag
-git tag -a "$release_tag" -m "Release $release_tag"
-git push origin "$release_tag"
-```
-
-Use `vMAJOR.MINOR.PATCH` tags. Adding a prerelease suffix such as `-rc.N` publishes a prerelease. The workflow uses the repository's built-in `GITHUB_TOKEN` with `contents: write`; no personal token is needed. Existing releases are not overwritten. Workflow execution and publication must be verified in GitHub Actions after pushing a tag.
-
-On Linux, download both assets into the same directory and verify with `sha256sum -c SHA256SUMS` before extracting. On Windows, replace `<tag>` with the downloaded release's tag in `Get-FileHash .\adaptive-engineering-<tag>.zip -Algorithm SHA256` and compare it with `SHA256SUMS`.
-
-## Official documentation references
-
-- Codex skills: https://learn.chatgpt.com/docs/build-skills
-- Antigravity skills: https://antigravity.google/docs/skills
-- Obsidian help: https://help.obsidian.md/
+- [Technical handoff](docs/mvp-handoff.md): architecture, A01–A14 coverage, build/verification instructions and remaining gates.
+- [Deterministic acceptance](docs/deterministic-acceptance-v1.md): exact-test mapping and evidence reports.
+- [Live-agent evaluation](docs/live-agent-evaluation-v1.md): synthetic Codex observations and runtime limits.
+- [Two-device procedure](docs/two-device-acceptance.md): preparation only; execution remains deferred.
+- [Core skill](.agents/skills/adaptive-engineering/SKILL.md) and [setup skill](.agents/skills/setup-vault/SKILL.md): bundled workflow instructions.
