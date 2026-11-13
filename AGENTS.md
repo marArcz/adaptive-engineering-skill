@@ -15,3 +15,7 @@ For implementation tasks:
 6. Give the user a detailed report of what changed, the review and checks performed, the commit, and any remaining limitations.
 
 Do not claim unperformed validation or commit unrelated user changes. If a task is incomplete or blocked, report its actual state rather than presenting it as completed.
+
+## NOTE:
+
+- This project use Notion to track progress and storing documents, notes about this project.
