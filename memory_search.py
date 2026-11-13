@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 
 import memory_contract as contract
-from memory_store import AREAS, decode_record, resolve_nodes, _digest, _pairs
+from memory_store import AREAS, decode_record, decode_deletions, resolve_nodes, _digest
 
 MAX_BYTES = 128 * 1024
 SKIP = {'.git', '.obsidian', '.trash', 'templates', 'attachments', 'node_modules'}
@@ -30,15 +30,20 @@ def _identity(raw, path):
 def _load(vault, max_notes):
     root = vault / 'memory'
     groups, blocked, deleted = {}, set(), set()
+    deletion_batches = []
     stats = {k: 0 for k in ('files_examined', 'invalid_files', 'unreadable_files',
                             'oversized_files', 'unsafe_links', 'conflicted_records')}
     incomplete = False
     scan_truncated = False
     if not root.exists() and not root.is_symlink():
-        return groups, deleted, stats, False, False
+        return groups, deleted, stats, False, False, deletion_batches
     if root.is_symlink() or not root.is_dir():
         stats['unsafe_links'] += 1
-        return {}, deleted, stats, True, False
+        return {}, deleted, stats, True, False, deletion_batches
+    deletion_area = root / 'deletions'
+    if deletion_area.exists() and not deletion_area.is_dir():
+        stats['invalid_files'] += 1
+        return {}, deleted, stats, True, False, deletion_batches
 
     def walk_error(error):
         nonlocal incomplete
@@ -84,11 +89,9 @@ def _load(vault, max_notes):
                     stats['oversized_files'] += 1
                     raise ValueError('oversized file')
                 if area == 'deletions':
-                    marker = json.loads(raw, object_pairs_hook=_pairs)
-                    contract.validate_collection([], [marker])
-                    if path.name != marker['id'] + '.json' or marker['id'] in deleted:
-                        raise ValueError('invalid deletion identity')
-                    deleted.add(marker['id'])
+                    ids = decode_deletions(raw, path.name)
+                    deleted.update(ids)
+                    deletion_batches.append(ids)
                     continue
                 data, body, envelope = decode_record(raw, revision=area == 'revisions')
                 record_id = data['id']
@@ -119,11 +122,39 @@ def _load(vault, max_notes):
         groups.pop(record_id, None)
     if incomplete:
         groups = {}
-    return groups, deleted, stats, incomplete, scan_truncated
+    return groups, deleted, stats, incomplete, scan_truncated, deletion_batches
 
 
 def _subject_key(data):
     return (data['kind'], data['scope'], data.get('project_id'), ' '.join(data['title'].split()).casefold())
+
+
+def deletion_closure(groups, seeds, batches=()):
+    """Whole-record cleanup follows lineage, provenance links and project scope."""
+    affected = set(seeds)
+    changed = True
+    while changed:
+        before = set(affected)
+        for batch in batches:
+            if affected & batch:
+                affected.update(batch)
+        for key, nodes in groups.items():
+            for node in nodes.values():
+                data = node['metadata']
+                lineage = set(data['supersedes']) | set(node.get('equivalent_ids', []))
+                references = lineage | set(data['related_ids']) | set(node.get('dependencies', {}))
+                if 'project_id' in data:
+                    references.add(data['project_id'])
+                if references & affected:
+                    affected.add(key)
+                if key in affected:
+                    # Invalid cross-subject supersedes/alias claims must not
+                    # turn a forget request into deletion of unrelated memory.
+                    affected.update(ref for ref in lineage if ref not in groups or any(
+                        _subject_key(other['metadata']) == _subject_key(data)
+                        for other in groups[ref].values()))
+        changed = affected != before
+    return affected
 
 
 def _lifecycle(groups, resolved, blocked_subjects=()):
@@ -209,7 +240,9 @@ def memory_snapshot(vault, max_notes=1500):
     vault = Path(vault)
     if not vault.is_dir() or max_notes < 1:
         raise ValueError("Vault must exist and max_notes must be positive")
-    groups, deleted, stats, incomplete, scan_truncated = _load(vault, max_notes)
+    groups, deleted, stats, incomplete, scan_truncated, deletion_batches = _load(vault, max_notes)
+    marked_deleted = set(deleted)
+    deleted = deletion_closure(groups, deleted, deletion_batches)
     resolved = {}
     blocked_subjects=set()
     for key, nodes in groups.items():
@@ -228,6 +261,7 @@ def memory_snapshot(vault, max_notes=1500):
     superseded,semantic_conflicts,aliases=_lifecycle(groups,resolved,blocked_subjects)
     stats['conflicted_records']+=len(semantic_conflicts)
     return {"groups": groups, "resolved": resolved, "superseded": superseded,
+            "deleted": deleted, "marked_deleted": marked_deleted, "deletion_batches": deletion_batches,
             "semantic_conflicts":semantic_conflicts,"aliases":aliases,
             "stats": stats, "incomplete": incomplete, "scan_truncated": scan_truncated}
 

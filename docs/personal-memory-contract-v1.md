@@ -57,9 +57,18 @@ storage and refresh are deferred to T12.
 A deletion marker is separate from a memory record and contains only
 `schema_version`, `id` (the deleted UUID), and `deleted_at` (UTC timestamp in
 the format above). It must contain no title, body, source, relationship, project
-identity, or other forgotten content. IDs are never reused. Deletion propagation,
-summary cleanup, and synchronization conflict handling belong to T15 and T21;
-Git history and backups are outside active-memory deletion.
+identity, or other forgotten content. IDs are never reused. T15 publishes an
+atomic JSON array of these unchanged markers as a UUID-named `.batch.json` file
+under `memory/deletions`, with at most 500 IDs. Existing single-ID `.json`
+markers remain supported. Repeated IDs across batches are a monotonic union;
+duplicate IDs inside a batch remain invalid. Damaged deletion metadata blocks
+recall and writes rather than risking resurrection.
+
+T15 suppresses marked IDs and linked dependencies before removing every affected
+managed revision and regenerating source-derived views. Markers are retained for
+later manual sync. Synchronization and actual-device acceptance remain T21/T22;
+Git history, backups, unsynchronized devices and unrelated user-authored files
+are outside active-memory deletion. See the bundled memory-forgetting guide.
 
 ## Compatibility and validation boundary
 

@@ -64,6 +64,8 @@ For explicit changes and ambiguous contradictions, follow [Memory corrections](r
 
 For bounded duplicate maintenance, follow [Memory consolidation](references/memory-consolidation.md). Preserve historical experiences, provenance and tentative basis; skip uncertain merges.
 
+For a direct user's forget request, follow [Explicit forgetting](references/memory-forgetting.md). Resolve the target and affected managed records before deletion, retain payload-free markers, and report partial cleanup and sync limits honestly.
+
 ## Read supporting guidance only for the relevant branch
 
 - `references/fallback.md`: **only when fallback is activated**.

@@ -125,6 +125,8 @@ def inspect_record(vault, record_id, *, project_id=None, max_notes=1500):
         snapshot = memory_snapshot(vault, max_notes)
         if snapshot['incomplete']:
             return {'status':'unavailable'}
+        if record_id in snapshot['deleted']:
+            return {'status':'not_found'}
         requested_id=record_id
         record_id=snapshot['aliases'].get(record_id,record_id)
         current = snapshot['resolved'].get(record_id)

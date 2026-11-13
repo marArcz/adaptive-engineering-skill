@@ -32,7 +32,7 @@ The snapshot can become stale immediately after a successful response. Another a
 
 ## Search, forgetting and validation
 
-T07 must use the resolver and exclude unresolved branches from current recall. Existing legacy search is not yet memory-aware. T15 must remove every revision containing forgotten content, including conflict branches, and propagate payload-free deletion markers. Revision retention is not yet an implementation of forgetting. Git history and backups remain outside active-memory deletion.
+T07 uses the resolver and excludes unresolved branches from current recall. Legacy technical-note search excludes managed memory. T15 removes all affected managed bases and revisions, including conflict branches, after atomically publishing payload-free deletion markers. Both ordinary and historical readers suppress marked IDs and their linked dependencies. Git history and backups remain outside active-memory deletion.
 
 Synthetic tests exercise creation/update/retries, controlled concurrent publication, external edits immediately before publication and to ancestors afterward, explicit resolution, missing parents, stale tokens, permission failures, uncertain publication results, path exclusions, compatible fields and symlinks. No personal vault or external remote is used.
 
@@ -79,4 +79,41 @@ Derived summaries resolve these aliases on their next read. Graph conflicts also
 quarantine other claims for the same subject and scope, so an unavailable
 canonical graph cannot cause a stale duplicate to resurface as current advice.
 Consolidation performs no age-based deletion or physical archive compaction.
-Forgetting must include equivalent identities and their retained histories.
+
+## Explicit forgetting (T15)
+
+`memory_forgetting.plan_forgetting` resolves an exact logical ID or an unambiguous
+normalized title within an explicit kind/scope. Its token binds the full inspected
+snapshot and affected IDs. All revision nodes participate, even historical or
+conflicted branches. Cleanup follows valid same-subject correction/equivalent-ID lineage in both
+directions, and reverse related/dependency/project-scope links. It conservatively
+removes whole linked records rather than attempting narrative redaction.
+
+`forget` requires that token, a trusted direct-user request and an active skill.
+Capture pause does not prevent explicit erasure. An anchored publication writes
+one atomic UUID-named `.batch.json` array of v1 deletion markers under
+`memory/deletions`. No title, source, body, project identity, digest or copied
+payload is persisted in these markers. The batch retains the affected IDs for
+recovery without a content-bearing journal. Existing single-ID markers and
+overlapping batches merge monotonically; malformed markers fail closed. Older
+clients require an upgrade to understand batch markers.
+
+Before physical unlink, marked IDs and later imported linked dependencies are
+excluded from current and historical recall, low-level record inspection and
+derived views. The writer rejects reuse of known deleted IDs and references to
+them, and rechecks after publication for deletion races. A late competing write
+may remain on disk but is suppressed and reported as failed pending cleanup.
+
+Cleanup uses no-follow directory handles, hashes and file-identity checks, then
+flushes the directory. It preserves detected intervening edits and verifies that
+affected files are absent and no new linked records appeared before reporting
+`forgotten`. Interrupted or uncertain cleanup returns `partial`/`unavailable`
+without success text; retain markers and replan by an affected ID to resume.
+Source-derived summaries and indexes regenerate on reads, so there is no separate
+persisted summary to rewrite. An unchanged retry produces no new batch.
+
+At most 500 IDs fit one atomic operation; bounded scans reject incomplete evidence.
+There is no semantic detection of unlinked copies, history rewriting, backup
+erasure or forced device synchronization. Noncooperating editors can still race
+the final file check or alter files after verification. T21/T22 remain responsible
+for sync simulation and actual two-device acceptance.

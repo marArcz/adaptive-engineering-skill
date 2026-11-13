@@ -152,8 +152,62 @@ def _nodes(vault, record_id):
 def read_revision_record(vault, record_id):
     """Resolve a snapshot. Conflicts return no current metadata or body."""
     contract._uuid(record_id, 'id')
+    if read_deletions(Path(vault)):
+        from memory_search import memory_snapshot
+        snapshot = memory_snapshot(vault)
+        if snapshot['incomplete']:
+            raise ValueError('deletion scan incomplete')
+        if record_id in snapshot['deleted']:
+            return None
     nodes = _nodes(Path(vault), record_id)
     return resolve_nodes(nodes)
+
+
+def decode_deletions(raw, name):
+    """Atomic batches contain only the original payload-free v1 markers."""
+    value = json.loads(raw, object_pairs_hook=_pairs)
+    if name.endswith('.batch.json'):
+        contract._uuid(name[:-11], 'deletion batch')
+        if not isinstance(value, list) or not 1 <= len(value) <= 500:
+            raise ValueError('invalid deletion batch')
+        markers = value
+    else:
+        markers = [value]
+    contract.validate_collection([], markers)
+    if not name.endswith('.batch.json') and name != markers[0]['id'] + '.json':
+        raise ValueError('invalid deletion identity')
+    return {marker['id'] for marker in markers}
+
+
+def read_deletions(vault):
+    """Fail closed on damaged, unsafe or unbounded deletion metadata."""
+    directory = vault / 'memory/deletions'
+    _safe(vault, directory)
+    if not directory.exists():
+        return set()
+    if not directory.is_dir():
+        raise ValueError('deletion area is not a directory')
+    deleted = set()
+    count = 0
+    def failed(error):
+        raise error
+    for folder, dirs, files in os.walk(directory, onerror=failed, followlinks=False):
+        for name in dirs:
+            _safe(vault, Path(folder) / name)
+        for name in files:
+            if name.startswith('.'):
+                continue
+            count += 1
+            if count > 1500:
+                raise ValueError('deletion scan limit exceeded')
+            path = Path(folder) / name
+            _safe(vault, path)
+            with path.open('rb') as source:
+                raw = source.read(128 * 1024 + 1)
+            if len(raw) > 128 * 1024:
+                raise ValueError('oversized deletion metadata')
+            deleted.update(decode_deletions(raw, name))
+    return deleted
 
 
 def read_record(vault, record_id, *, history=False):
@@ -224,7 +278,9 @@ def _publish(directory, filename, raw):
         handles.append(root_fd)
         memory_fd = os.open('memory', flags, dir_fd=root_fd)
         handles.append(memory_fd)
-        directory_fd = os.open('revisions', flags, dir_fd=memory_fd)
+        if directory.name not in ('revisions', 'deletions'):
+            raise ValueError('unsupported managed publication area')
+        directory_fd = os.open(directory.name, flags, dir_fd=memory_fd)
         handles.append(directory_fd)
         temporary = '.memory-' + str(uuid.uuid4())
         fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
@@ -280,6 +336,8 @@ def write_record(vault, data, body, *, expected_token=None, revision_id=None, re
         gate = capture_gate(vault)
         if not gate.allowed:
             raise ValueError(gate.message)
+        if data['id'] in read_deletions(vault):
+            raise ValueError('deleted memory ID cannot be reintroduced')
         current = read_revision_record(vault, data['id'])
         if dependencies is None and current and current['status']=='current' and current.get('dependencies'):
             dependencies=current['dependencies']
@@ -328,11 +386,19 @@ def write_record(vault, data, body, *, expected_token=None, revision_id=None, re
         if not gate.allowed:
             raise ValueError(gate.message)
         decode_record(raw, revision=True)
+        deleted = read_deletions(vault)
+        references = {data['id'], *data['related_ids'], *data['supersedes'],
+                *(dependencies or {}), *(equivalent_ids or []),
+                *([data['project_id']] if 'project_id' in data else [])}
+        if references & deleted:
+            raise ValueError('write references deleted memory')
         for key, expected in (dependencies or {}).items():
             dependent = read_revision_record(vault, key)
             if dependent is None or dependent['status'] != 'current' or dependent['token'] != expected:
                 raise ValueError('dependency changed since it was read')
         published = _publish(directory, path.name, raw)
+        if references & read_deletions(vault):
+            raise ValueError('memory deleted during publication; cleanup required')
         saved = read_revision_record(vault, data['id'])
         if saved is None or saved['token'].get(revision_id) != _digest(raw):
             raise ValueError('published revision failed verification')

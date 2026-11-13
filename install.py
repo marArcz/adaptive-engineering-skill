@@ -32,7 +32,7 @@ def main():
     if not a.dry_run:
         dest.parent.mkdir(parents=True,exist_ok=True)
         shutil.copytree(SKILL,dest)
-        for module in ('memory_consolidation.py','memory_corrections.py','memory_summaries.py','memory_journal.py','memory_operations.py','project_identity.py','memory_capture.py','memory_setup.py','memory_context.py','memory_search.py','memory_store.py','memory_contract.py','memory_boundary.py'):
+        for module in ('memory_forgetting.py','memory_consolidation.py','memory_corrections.py','memory_summaries.py','memory_journal.py','memory_operations.py','project_identity.py','memory_capture.py','memory_setup.py','memory_context.py','memory_search.py','memory_store.py','memory_contract.py','memory_boundary.py'):
             shutil.copyfile(HERE/module,dest/'scripts'/module)
     if a.with_agents:
         root=Path(a.repo).expanduser().resolve(); agents=root/'AGENTS.md'
