@@ -4,7 +4,8 @@ T19 verifies local script behavior using synthetic temporary vaults. The authori
 [`tests/acceptance-matrix-v1.json`](../tests/acceptance-matrix-v1.json): each acceptance check lists
 requirements, exact unittest IDs, the scope those tests establish and the remaining validation.
 The source is the [MVP specification](https://www.notion.so/41558ec5244581fab0a0d560711a1f21).
-The mapping covers R01–R10 and A01–A10/A12–A14. A11 is explicitly deferred.
+The mapping covers R01–R10 and A01–A10/A12–A14. A11 is explicitly deferred. T21 adds
+installed-runtime sync simulation on one host, separate from actual two-device acceptance.
 
 ## Reproduce the evidence
 
@@ -48,7 +49,7 @@ stage only the intended files and supply the resulting `git write-tree` ID as `-
 | R06: corrections and conflicts | A08, A12, A14 | Stale-token preservation, semantic conflict, real Git conflict, publication failures |
 | R07: journal and consolidation | A04, A09 | Significant episodes, exact duplicates, distinct outcomes and old meaningful history |
 | R08: explicit forgetting | A10 | Closure cleanup, derived-view removal, payload-free markers, interrupted deletion and resurrection prevention |
-| R09: manual Git sync boundaries | A12 | Local conflicting branches and write gate; actual sync remains separate |
+| R09: manual Git sync boundaries | A12 | Two local clones, explicit harness push/pull, both semantic merge orders and runtime subprocess spy; actual devices remain separate |
 | R10: legacy compatibility | A13 | Before/after byte hashes, reviewed catalog fields, extracted installation checks |
 
 The JSON matrix supplies executable test references for every row rather than treating this table
@@ -80,6 +81,45 @@ reproducible under privileged test users; this is not a claim about a physically
 The evidence-report tests inject failures and skips into tiny independent suites to verify that
 the report cannot turn those outcomes into passing acceptance evidence.
 
+## T21 offline clone simulation
+
+[`tests/test_memory_sync.py`](../tests/test_memory_sync.py) uses one disposable bare remote and
+independent differently named vault clones. Both runtimes are installed from the same source build
+into temporary targets. Each has a separate child-only `Path.home` fixture and saved `vault_path`;
+workspace paths are supplied at runtime. The suite never overrides `HOME` or `CODEX_HOME` or uses
+personal configuration. Reproduce just this supporting evidence with:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p test_memory_sync.py -v
+```
+
+Three workflows establish the following on one host:
+
+1. Capture synthetic identity, preference, fact, portable project decision and experience through
+   installed helpers. Explicit harness commits/push/pull carry them from alpha to beta. Recall uses
+   the same project UUID at different runtime checkout paths. A beta correction propagates back to
+   alpha, with current and historical views checked. Alpha then forgets the correction lineage and
+   related feedback; beta receives the deletion and loses the derived trait, while unrelated facts,
+   identity and decisions remain. Active revision files are removed and deletion markers contain
+   only schema version, UUID and deletion time.
+2. Divergent authored knowledge edits cause a real Git textual conflict. Capture blocks without a
+   success announcement, conflicted text is excluded and unrelated profile recall survives. An
+   explicit harness resolution retains both exact authored versions in separate notes. Capture
+   resumes and the resolution propagates to the other clone.
+3. Independent conflicting preferences merge cleanly in both alpha-first and beta-first orders.
+   One imported claim has a later valid timestamp. Neither becomes current advice; both versions
+   remain inspectable unresolved history pending clarification.
+
+Every runtime helper call wraps the actual `subprocess.run`: only exact read-only Git inspection
+commands are allowed. Any unexpected subprocess fails the test before execution. All commits,
+remote synchronization and conflict resolution are explicit harness operations. Both configs are
+checked to contain only their local vault paths; persisted shared vault content is scanned for
+both checkout paths, vault/config locations and device mapping keys.
+
+This is an offline Linux simulation, not two physical devices, live host interpretation or an
+external remote. The tests do not establish concurrent deletion of edits made on an unsynced device,
+network/authentication failure recovery, native Windows/macOS behavior or deletion from Git history.
+
 ## Beyond deterministic evidence
 
 - **T20:** fresh-agent classification, hypothetical/inferred wording, source-as-data handling,
@@ -87,12 +127,12 @@ the report cannot turn those outcomes into passing acceptance evidence.
   behavior in an active host. See the [versioned live-agent evaluation](live-agent-evaluation-v1.md)
   for direct prompts, recorded host observations and gaps. A new Python process does not establish
   these behaviors.
-- **T21:** independent local clones, sync/merge ordering and deletion propagation. Conflicting
-  branches in one temporary repository do not establish all clone behavior.
+- **T21:** the offline clone simulation above establishes the tested sync/merge orderings and
+  deletion propagation; it does not establish all concurrent/offline edit combinations.
 - **T22/A11:** actual two-device manual sync, different device-local vault/workspace paths and a
   fresh active skill session. Neither local clones nor unit tests establish actual device acceptance.
 
 Active managed deletion does not erase Git history, backups or other unsynced copies. Tests do not
-use personal memory, user configuration or external remotes. Native Windows/macOS, live host discovery
+use personal memory, user configuration or external network remotes. Native Windows/macOS, live host discovery
 and the GitHub Actions release job require their own evidence; the local suite exercises Linux
 layouts and POSIX write behavior.

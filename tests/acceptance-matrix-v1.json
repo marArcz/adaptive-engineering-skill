@@ -14,7 +14,8 @@
       "tests": [
         "test_memory_acceptance.AcceptanceTests.test_fresh_process_recall_keeps_identity_profile_and_project_scopes",
         "test_memory_session.SessionTests.test_activation_is_read_only_general_bounded_and_not_a_save_claim",
-        "test_memory_context.ContextTests.test_standalone_cli_output_is_budgeted_text"
+        "test_memory_context.ContextTests.test_standalone_cli_output_is_budgeted_text",
+        "test_memory_sync.MemorySyncTests.test_bidirectional_recall_correction_and_forgetting_closure"
       ],
       "follow_up": "T20/T22: fresh agent interpretation and actual cross-device session."
     },
@@ -81,14 +82,15 @@
       "requirements": [
         "R05"
       ],
-      "scope": "Portable identity survives two workspace locations; new content cannot persist local paths.",
+      "scope": "Portable identity survives distinct checkout paths and installed runtimes in two local vault clones; saved config stores only each local vault path and shared memory stores neither path nor mappings.",
       "tests": [
         "test_project_identity.ProjectIdentityTests.test_two_checkouts_match_without_persisting_locations",
         "test_memory_operations.OperationTests.test_project_isolation_and_runtime_checkouts",
         "test_memory_boundary.MemoryBoundaryTests.test_paths_in_every_position",
-        "test_memory_learning.LearningTests.test_paths_are_rejected_in_all_new_learning_content"
+        "test_memory_learning.LearningTests.test_paths_are_rejected_in_all_new_learning_content",
+        "test_memory_sync.MemorySyncTests.test_bidirectional_recall_correction_and_forgetting_closure"
       ],
-      "follow_up": "T21: independent clones; T22: actual devices."
+      "follow_up": "T22: actual devices and fresh active skill sessions."
     },
     {
       "id": "A07",
@@ -115,7 +117,8 @@
         "test_memory_corrections.CorrectionTests.test_manual_edit_during_publication_preserved_as_semantic_conflict",
         "test_memory_store.StoreTests.test_external_edit_during_publication_and_resolution",
         "test_memory_acceptance.AcceptanceTests.test_consolidate_correct_and_forget_refresh_every_view_and_keep_legacy",
-        "test_memory_store.StoreTests.test_create_update_retries_and_stale_tokens"
+        "test_memory_store.StoreTests.test_create_update_retries_and_stale_tokens",
+        "test_memory_sync.MemorySyncTests.test_bidirectional_recall_correction_and_forgetting_closure"
       ],
       "follow_up": "T20: natural-language contradiction recognition and clarification."
     },
@@ -138,16 +141,17 @@
       "requirements": [
         "R08"
       ],
-      "scope": "Managed lineage and derived closure removed; interrupted cleanup suppressed and retriable.",
+      "scope": "Managed lineage and derived closure removed; interrupted cleanup suppressed and retriable. Manual push/pull between two local clones propagates correction lineage deletion, derived cleanup and payload-free markers.",
       "tests": [
         "test_memory_forgetting.ForgettingTests.test_remove_all_revisions_base_and_conflict_branches",
         "test_memory_forgetting.ForgettingTests.test_derived_records_and_views_are_cleaned_transitively",
         "test_memory_forgetting.ForgettingTests.test_aliases_and_correction_history_are_removed_together",
         "test_memory_forgetting.ForgettingTests.test_interrupted_cleanup_suppresses_whole_batch_and_resumes",
         "test_memory_forgetting.ForgettingTests.test_known_ids_and_imported_dependencies_cannot_resurface",
-        "test_memory_acceptance.AcceptanceTests.test_consolidate_correct_and_forget_refresh_every_view_and_keep_legacy"
+        "test_memory_acceptance.AcceptanceTests.test_consolidate_correct_and_forget_refresh_every_view_and_keep_legacy",
+        "test_memory_sync.MemorySyncTests.test_bidirectional_recall_correction_and_forgetting_closure"
       ],
-      "follow_up": "T21/T22: propagation after manual sync. Git history and backups are outside active deletion."
+      "follow_up": "T22: actual-device propagation. Git history and backups are outside active deletion."
     },
     {
       "id": "A11",
@@ -166,14 +170,16 @@
         "R06",
         "R09"
       ],
-      "scope": "Real local Git conflict gates capture; conflicted notes excluded; semantic conflicts survive clean merges.",
+      "scope": "Installed runtimes in independent local clones: textual Git conflict gates capture and excludes conflicted text while unrelated recall survives; deliberate resolution retains both authored versions; clean semantic contradictions remain unresolved in both merge orders. Runtime subprocess spying permits exact read-only Git inspections only; sync is explicit harness work.",
       "tests": [
         "test_vault_guard.VaultGuardTests.test_real_conflict_and_resolution",
         "test_vault_guard.VaultGuardTests.test_search_excludes_markers_beyond_excerpt",
         "test_memory_corrections.CorrectionTests.test_clean_git_merge_does_not_resolve_semantic_conflicts_by_timestamp",
-        "test_memory_acceptance.AcceptanceTests.test_real_merge_gate_blocks_capture_and_keeps_unrelated_recall"
+        "test_memory_acceptance.AcceptanceTests.test_real_merge_gate_blocks_capture_and_keeps_unrelated_recall",
+        "test_memory_sync.MemorySyncTests.test_textual_conflict_blocks_capture_but_keeps_unrelated_recall",
+        "test_memory_sync.MemorySyncTests.test_clean_semantic_contradiction_stays_unresolved_in_both_merge_orders"
       ],
-      "follow_up": "T21: independent clones and both merge orders; T20: agent explains unresolved meaning."
+      "follow_up": "T22: actual-device manual sync; T20: agent explains unresolved meaning. Offline simulation is supporting evidence only."
     },
     {
       "id": "A13",
