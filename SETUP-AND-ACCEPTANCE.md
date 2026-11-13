@@ -104,7 +104,7 @@ Pass: local project inspection **and** appropriate current official verification
 
 > Use adaptive-engineering to learn this: [supply a small technical explanation or source URL].
 
-Pass: saves a source-linked candidate under `research/candidates/`, confirms search discovery, and reports its path without requesting duplicate authorization. For GitHub, also updates the reference catalog. No approval, commit, or push occurs.
+Pass: engineering material saves through the validated candidate writer under `research/candidates/`; general/non-coding material uses evidence-labelled managed knowledge and scoped memory retrieval. Confirm discovery and report the pointer/ID without requesting duplicate authorization. Preserve existing candidate/approved notes and reviewed catalog metadata. For GitHub, complete or report the separate catalog steps. No approval, commit, or push occurs. New content/provenance must exclude project paths and secrets.
 
 See `.agents/skills/adaptive-engineering/evals/scenarios.md` for acceptance scenarios. Unit tests validate scripts only; they do **not** validate live agent decisions.
 

@@ -15,4 +15,4 @@ Project-specific instructions prevail over generic vault preferences unless demo
 
 ### Research notes
 
-After finishing, optionally suggest a compact new vault note with evidence, versions, useful paths, risks, and `status: candidate`. **Do not write to the vault without explicit permission.** A request to learn and save findings supplies scoped permission: follow [Learning to the vault](learn.md). A research request alone does not authorize writes.
+After finishing, optionally suggest a compact new engineering candidate with evidence, versions, component descriptions and risks. Do not persist project paths or filenames. An explicit request to learn and save findings supplies scoped permission: follow [Learning to the vault](learn.md) and its validated candidate writer. A technical research request alone does not authorize candidate/catalog writes. Core profile/working-style recall and eligible personal-memory capture remain separate from technical-reference selection; a remembered preference cannot replace project evidence.

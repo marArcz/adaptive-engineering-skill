@@ -21,17 +21,19 @@ that is accurate; do not invent a URL to replace an excluded source path.
 
 Credential-free HTTP(S) URLs are allowed, subject to known-runtime checks and
 checks of their query/fragment content. Explicit Markdown and wiki links into
-`memory/profile`, `memory/identity`, `memory/experiences`, `memory/projects`, and
-`memory/knowledge` ending in `.md` are permitted. Traversal is rejected and
+`memory/profile`, `memory/identity`, `memory/experiences`, `memory/projects`,
+`memory/knowledge`, and the legacy `research/candidates` area ending in `.md`
+are permitted. Traversal is rejected and
 visible labels are still checked. Bare project paths are not exempt simply
 because they resemble links. Numeric fractions and slash-separated dates remain
 usable. The boundary deliberately errs toward rejection of ambiguous path-like
 text; rephrase it instead of disabling the check.
 
-The existing project serializer and T01 reference contract validator call this
-boundary. Production memory writers do not exist yet: T06 and subsequent writer
-tasks must integrate it. The skill guidance also requires it for new managed
-memory derived from learning. Existing legacy vault notes are not migrated.
+The project serializer, contract validator, managed-memory writers and both
+learning adapters call this boundary. New engineering candidates are checked
+before publication, including metadata, body and provenance. Newly authored
+catalog-adjacent text must pass the same check; retained reviewed metadata is
+not silently rewritten. Existing legacy vault notes are not migrated.
 
 This is a deterministic boundary, not a semantic proof. Unknown device names,
 unusual encodings, and arbitrary prose may require agent judgment. It is not a

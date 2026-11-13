@@ -120,9 +120,10 @@ After configuring an existing vault, ask the agent:
 
 - `$adaptive-engineering learn this` — summarize relevant supplied material or conversation into a note.
 - `$adaptive-engineering learn <topic>` — research authoritative sources and save bounded findings.
+- `$adaptive-engineering learn this study-planning explanation` — retain non-coding knowledge with explicit evidence and applicability limits.
 - `$adaptive-engineering learn from <GitHub URL>` — save findings plus a repository catalog entry.
 
-These are natural-language requests, not shell commands. The agent follows [the learning workflow](.agents/skills/adaptive-engineering/references/learn.md). Your request authorizes relevant writes without another confirmation. Notes go to `research/candidates/` and remain unapproved, searchable candidates. Repeated learning updates clearly matching candidates; approved notes are preserved. Commits and pushes require separate authorization. A missing or inaccessible vault must be resolved before saving.
+These are natural-language requests, not shell commands. The agent follows [the learning workflow](.agents/skills/adaptive-engineering/references/learn.md). Your request authorizes relevant writes without another confirmation. General subjects use managed knowledge with user-claim, inspected-source or inferred evidence labels; they do not become profile facts. The engineering route keeps searchable legacy candidates under `research/candidates/`: identical snapshots are reused and refreshed material gets a new snapshot without replacing reviewed notes. Neither route automatically approves knowledge or permits project paths/secrets. GitHub catalog updates remain separate verified steps, preserving reviewed metadata. Commits and pushes require separate authorization. A missing or inaccessible vault must be resolved before saving.
 
 ## Script examples
 

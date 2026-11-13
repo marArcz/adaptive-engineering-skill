@@ -276,11 +276,13 @@ def _publish(directory, filename, raw):
         flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
         root_fd = os.open(directory.parents[1], flags)
         handles.append(root_fd)
-        memory_fd = os.open('memory', flags, dir_fd=root_fd)
-        handles.append(memory_fd)
-        if directory.name not in ('revisions', 'deletions'):
+        area = directory.parent.name
+        if (area, directory.name) not in (('memory', 'revisions'), ('memory', 'deletions'),
+                                          ('research', 'candidates')):
             raise ValueError('unsupported managed publication area')
-        directory_fd = os.open(directory.name, flags, dir_fd=memory_fd)
+        area_fd = os.open(area, flags, dir_fd=root_fd)
+        handles.append(area_fd)
+        directory_fd = os.open(directory.name, flags, dir_fd=area_fd)
         handles.append(directory_fd)
         temporary = '.memory-' + str(uuid.uuid4())
         fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,

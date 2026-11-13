@@ -8,7 +8,7 @@
 - Use one primary agent by default. Do not spawn sub-agents for routine tasks.
 - Run appropriate checks, be truthful about results, and cite the local file patterns followed.
 - Managed-memory capture follows the active skill's saved boundaries and validated operations. Legacy candidate notes/catalog writes require explicit learning; unrelated vault changes remain unauthorized.
-- An explicit `learn <topic>`, `learn from <URL>`, or `learn this` request authorizes relevant candidate notes and GitHub catalog updates; follow the skill's learning route. Approval, commits, and pushes require separate authorization.
+- An explicit `learn <topic>`, `learn from <URL>`, or `learn this` request authorizes relevant managed general knowledge or legacy engineering candidates and applicable GitHub catalog updates; follow the validated learning route. Keep source claims distinct from personal facts, preserve reviewed metadata and exclude project paths. Approval, commits, and pushes require separate authorization.
 
 ## Project specifics (fill in only known values)
 

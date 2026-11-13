@@ -25,8 +25,9 @@ def _reject(reason):
 def _vault_link(target):
     target = target.split('|', 1)[0].split('#', 1)[0]
     parts = target.split('/')
-    return (len(parts) >= 3 and parts[0] == 'memory'
-            and parts[1] in {'profile', 'identity', 'experiences', 'projects', 'knowledge'}
+    return (len(parts) >= 3
+            and ((parts[0] == 'memory' and parts[1] in {'profile', 'identity', 'experiences', 'projects', 'knowledge'})
+                 or parts[:2] == ['research', 'candidates'])
             and all(p and p not in {'.', '..'} for p in parts)
             and '\\' not in target and '%' not in target and target.endswith('.md'))
 
