@@ -21,7 +21,7 @@ Python 3.9+ and local filesystem access are required; the Python tools use the s
 
 Linux installer layouts, synthetic fresh Codex sessions and offline clone synchronization have reviewed evidence. Antigravity live behavior, native Windows/macOS writes and actual two-device continuity remain unverified. T22 device execution is user-deferred, so full MVP acceptance remains **Blocked**. See the [acceptance and SDD handoff](https://www.notion.so/41758ec5244581858a80e317ce9d0d6f).
 
-This README describes the current personal-memory branch. The manifest still says `0.4.1`; this does not establish that the published `v0.4.1` release or a default marketplace install includes these changes. Use the exact reviewed local build when testing this branch.
+This README describes the current personal-memory branch, whose manifest version is `0.5.0-beta.1`. This prerelease is for testing; its version does not establish that a beta has been published or that the published `v0.4.1` release or a default marketplace install includes these changes. Use the exact reviewed local build when testing this branch; the acceptance and runtime limits above still apply.
 
 ## Install
 
