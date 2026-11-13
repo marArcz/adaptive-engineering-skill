@@ -16,11 +16,12 @@ Coding, debugging, refactoring, and review require the separate [code simplicity
 - `scripts/search_catalog.py`: GitHub metadata lookup **without network access**
 - `vault-template/`: Obsidian Markdown template, candidate repo catalog and `.gitignore`
 - `init_vault.py`, `configure.py`, `install.py`: non-overwriting setup tools
+- `distribution.py`, `package_release.py`: shared runtime inventory and tracked-source bundle build/verification
 - `tests/`: stdlib deterministic tests; `evals/`: manual live-agent acceptance tests
 
 ## Requirements
 
-Python 3.9+ (standard library only); Git and Obsidian optional for actual versioning/editing. The agent must have filesystem access to the relevant repo and vault; in sandboxed environments, allow access explicitly. No shell scripts download or execute code from the internet.
+Python 3.9+ (standard library only) and local filesystem access. Setup and read-only tools can run separately, but safe memory/candidate publication requires Git for merge inspection and POSIX directory handles, no-follow opens, hard links, directory flushing and capture locking. Unsupported writes fail explicitly. Obsidian and Git-backed vault versioning are optional; synchronization is manual. The installer targets below are exercised on Linux, not native Windows/macOS or live Codex/Antigravity hosts. No scripts download or execute code from the internet.
 
 ## Codex marketplace installation
 
@@ -35,7 +36,7 @@ Start a new Codex session after installation. You can also browse the marketplac
 
 For local development, run `codex plugin marketplace add /absolute/path/to/adaptive-engineering-skill` instead of adding the GitHub source. The marketplace is named `adaptive-engineering`; its single plugin uses the same name. The supported `.codex-plugin/plugin.json` manifest points at the existing `.agents/skills/` directory, keeping one skill source for marketplace and standalone installation.
 
-The plugin includes no MCP server, hooks, or service connection. Choose marketplace installation or the standalone installer for Codex to avoid loading duplicate copies of the skill. The standalone installer remains available for Antigravity and repository-local use.
+The plugin includes no MCP server, hooks, or service connection. Choose marketplace installation or the standalone installer for Codex to avoid loading duplicate copies. Both modes include the same adaptive-engineering and setup-vault skills. The standalone installer remains available for Antigravity and repository-local use; installing it does not create/configure a vault or enable a background process.
 
 ### Guided vault setup after installation
 
@@ -81,7 +82,7 @@ py -m unittest discover -s tests -v
 
 In Obsidian: **Open folder as vault** → select `C:\Dev\engineering-vault`. The `.obsidian/` directory will be created by Obsidian. `init_vault.py --git-init` performs `git init` only: create a private GitHub repository/remote yourself and review files for secrets before committing or pushing.
 
-If the project already has `AGENTS.md`, the installer preserves it; manually merge the short project-first policy from `AGENTS.example.md`. If the skill destination already exists it refuses to overwrite. If the legacy `web-engineering` skill is installed, disable/remove it separately **after** validating Adaptive Engineering to avoid conflicting skill activations.
+If the project already has `AGENTS.md`, the installer preserves it; manually merge the short project-first policy from `AGENTS.example.md`. It preflights both skill destinations and refuses if either exists, including symlinks. A missing runtime resource fails before installation; an interrupted copy may leave new partial destinations, which must be inspected before retrying. No in-place upgrade or deletion of old instructions is performed. If the legacy `web-engineering` skill is installed, disable/remove it separately **after** validating Adaptive Engineering to avoid conflicting skill activations.
 
 ## macOS/Linux
 
@@ -103,7 +104,7 @@ python install.py --target antigravity-global
 python install.py --target antigravity-cli-global
 ```
 
-The installer targets `~/.agents/skills/adaptive-engineering/` for Codex , `~/.gemini/config/skills/adaptive-engineering/` for Antigravity App/IDE, and `~/.gemini/antigravity-cli/skills/adaptive-engineering/` for Antigravity CLI. Repository-local `my-project/.agents/skills/adaptive-engineering/` is recommended as a shared path. Agents may need a restarted/new session for discovery. Paths depend on environment: Windows and WSL have different home directories.
+The installer targets `~/.agents/skills/adaptive-engineering/` for Codex, `~/.gemini/config/skills/adaptive-engineering/` for Antigravity App/IDE, and `~/.gemini/antigravity-cli/skills/adaptive-engineering/` for Antigravity CLI, with setup-vault beside it. Repository-local `my-project/.agents/skills/` is the shared alternative. The main skill's scripts directory contains all memory modules, init_vault.py, configure.py and vault-template, so setup works after the distribution checkout is unavailable. Resources are resolved from the loaded skill, never the active project's helper names. Agents may need a new session for discovery. Windows and WSL have separate user configuration; safe memory writes currently require the POSIX capabilities described above.
 
 ## Try it
 
@@ -145,7 +146,16 @@ Search scripts return compact local JSON. `--scope app` assumes that directory e
 
 ## Publishing a release
 
-The [release workflow](.github/workflows/release.yml) runs when a version tag is pushed. It runs the unit suite, builds an installable ZIP, tests the extracted bundle and installers, then publishes a GitHub Release with generated notes, `adaptive-engineering-<tag>.zip`, and `SHA256SUMS`. The archive includes the hidden `.agents/` skill and marketplace directories, `.codex-plugin/` manifest, icon assets, and vault template; it excludes Git history, workflows, and untracked files.
+The [release workflow](.github/workflows/release.yml) runs when a version tag is pushed. It runs the unit suite, uses package_release.py to build an installable ZIP, runs the extracted suite and isolated setup checks for all four installer targets, then publishes a GitHub Release with `adaptive-engineering-<tag>.zip` and `SHA256SUMS`. The shared inventory includes all memory/setup modules, both skills and references, manifests, assets, vault templates, docs and tests. Git history, workflows, caches/bytecode, environment files, personal vaults and untracked files are excluded. Existing artifacts are not overwritten.
+
+For local verification from a committed tree, without tagging or publishing:
+
+```bash
+python3 package_release.py build --tag v0.4.1-local --ref HEAD --output /tmp/adaptive-engineering-v0.4.1-local.zip
+python3 package_release.py verify /tmp/adaptive-engineering-v0.4.1-local.zip
+```
+
+The label names the local ZIP; it does not create a Git tag or change the manifest version. Build can also take a staged Git tree ID through --ref for precommit verification. Verification uses disposable vaults and Python fixture-home overrides, leaves user installations/configuration alone, and runs installed tools in isolated interpreters. It does not certify live host discovery, fresh-agent behavior or two-device continuity. Verify only an archive built from trusted source: the test command executes its packaged scripts.
 
 After committing and pushing the intended changes, tag the release commit:
 

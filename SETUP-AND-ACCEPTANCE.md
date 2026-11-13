@@ -1,4 +1,4 @@
-# Adaptive Engineering v0.4.1 — Setup and acceptance checklist
+# Adaptive Engineering — Setup and acceptance checklist
 
 ## 0. Scope
 
@@ -7,6 +7,8 @@
 - Local Obsidian vault + optional Git repository: bounded memory during active sessions; technical-note searches on fallback or explicit learning requests.
 - Candidate GitHub catalog, not an automatic code-fetcher.
 - No guaranteed savings in the Codex five-hour allowance: benchmark.
+- The release inventory includes all memory/setup modules, both existing skills, references and templates. Standalone targets bundle their own setup resources under the main skill's scripts directory. Installation alone does not configure a personal vault.
+- Safe memory/candidate writes currently require Git and POSIX filesystem/locking operations. Target layouts are verified on Linux; native host behavior and actual Windows/macOS execution require separate evidence.
 
 ## 1. Create vault
 
@@ -49,7 +51,11 @@ python3 install.py --target repo --repo "$HOME/Dev/my-project" --with-agents
 
 If `AGENTS.md` exists, it is preserved. Merge the relevant project-first policy from `AGENTS.example.md` yourself. Old v0.3 skill `web-engineering` is not removed, so disable it separately after validation to avoid duplicate activations.
 
+Both adaptive-engineering and setup-vault are installed. If either target already exists, installation stops before copying; source setup resources do not depend on the active project or development checkout. Missing resources and symlink targets are rejected. Inspect any new partial destination after an interrupted copy before retrying. Existing user vault/configuration is not modified by installation.
+
 ## 3. Verify local scripts
+
+An extracted test distribution can be checked with `python3 package_release.py verify <trusted-archive.zip>`. It runs this suite, validates the marketplace/onboarding tree and exercises repository-local plus all three global target layouts with independent synthetic setup/configuration. Build the archive from a committed or staged Git tree with package_release.py; this step neither tags nor publishes.
 
 ```bash
 python3 -m unittest discover -s tests -v

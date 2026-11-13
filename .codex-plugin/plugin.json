@@ -1,14 +1,14 @@
 {
   "name": "adaptive-engineering",
   "version": "0.4.1",
-  "description": "Project-first engineering with code simplicity rules and explicit learning to a local knowledge vault.",
+  "description": "One assistant with active-session local memory, general learning and project-first engineering.",
   "author": {
     "name": "marArcz",
     "url": "https://github.com/marArcz"
   },
   "homepage": "https://github.com/marArcz/adaptive-engineering-skill",
   "repository": "https://github.com/marArcz/adaptive-engineering-skill",
-  "keywords": ["engineering", "code-review", "simplicity", "knowledge-vault"],
+  "keywords": ["engineering", "code-review", "simplicity", "knowledge-vault", "personal-memory", "learning"],
   "skills": "./.agents/skills/",
   "extensions": {
     "com.openai": {
@@ -17,8 +17,8 @@
   },
   "interface": {
     "displayName": "Adaptive Engineering",
-    "shortDescription": "Simple coding and learning",
-    "longDescription": "Inspect existing project patterns before coding, debugging, refactoring, or review. Keep changes simple and validate them with focused checks. Guided setup creates or connects a local vault; explicit learn requests save candidate knowledge and GitHub references there. Requires local filesystem access and Python for helper scripts.",
+    "shortDescription": "Memory, learning and coding",
+    "longDescription": "Continue with one assistant using bounded recall and selective capture while the skill is active. Keep memory in a user-owned local vault, configure its location per device, and sync manually with Git. Learn general subjects with source labels and preserve reviewed engineering knowledge. Coding stays project-first with focused validation. Requires Python and local filesystem access; safe memory publication requires Git and POSIX filesystem operations.",
     "developerName": "marArcz",
     "category": "Developer Tools",
     "capabilities": ["Read", "Write"],

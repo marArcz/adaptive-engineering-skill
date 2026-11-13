@@ -4,10 +4,10 @@ Use this flow when the user runs plugin setup, asks to set up a vault, or accept
 
 ## Locate the bundled tools
 
-- Anchor paths to the loaded skill location, not the current project or a guessed cache directory. The plugin root contains `.codex-plugin/plugin.json`, `init_vault.py`, `configure.py`, and `vault-template/`. From either bundled skill's directory (`.agents/skills/<name>/`), the root is three parent directories up.
+- Anchor paths to the loaded skill location, not the current project or a guessed cache directory. Both distribution modes provide the existing adaptive-engineering and setup-vault skills as siblings. In a standalone installation, the main skill's `scripts/` contains `init_vault.py`, `configure.py`, `memory_setup.py` and `vault-template/`. Prefer that complete directory. In a source/marketplace bundle these resources are at the distribution root, three parent directories above either `.agents/skills/<name>/` folder.
 - Verify these files exist. Use their absolute paths for commands, quoting paths through structured arguments where available. Do not scan the user's home directory or download and execute replacement scripts.
 - Use an available Python 3.9+ interpreter (`python3`, `python`, or `py -3` as appropriate). If none is available, explain the requirement and resume after the user installs Python. Do not install it automatically.
-- Standalone skill installations may omit the setup tools. In that case, request the extracted distribution path containing them; do not pretend the plugin bundle is present.
+- Older standalone installations may omit setup resources. If neither location contains the required tools/template, report the missing resources and request the extracted distribution path or a separately authorized reinstall. Never substitute files from the active project.
 
 ## Choose the vault
 
@@ -27,7 +27,7 @@ Keep the vault outside the plugin/cache and, by default, outside the current cod
 
 ## Verify and finish
 
-- Run `configure.py --show` after changing saved configuration. Use `configure.py --show-capture` to inspect portable settings and `--capture paused` or `--capture active` to change mode. Explain that settings do not implement capture by themselves; automatic capture and enforcement are forthcoming. Run the installed `scripts/search_vault.py --query "engineering" --limit 1` with normal resolution to confirm the **effective** vault. Empty search results are valid; verify the reported vault path matches the selected destination, rather than assuming a successful config write defeats an environment override.
+- Run `configure.py --show` after changing saved configuration and `--show-capture` to inspect portable settings. The core skill invokes selective capture only during active sessions; setup installs no background hook and is not proof that a memory save occurred. For conversational pause/resume, use the verified memory_session controls. Run the main skill's `scripts/search_vault.py --query "engineering" --limit 1` with normal resolution to confirm the **effective** vault. Empty search results are valid; verify the reported vault path matches the selected destination, rather than assuming a successful config write defeats an environment override.
 - Report the actual vault path and, if changed, configuration file path. State any unresolved access/override problems or partial success. Learning needs write access; do not claim a successful note save based on this read-only retrieval check.
-- Tell users they can optionally open the folder in Obsidian, and can now request `learn <topic>` or `learn this`. Notes are saved under `research/candidates/`. If setup interrupted a learn request, resume that request once configuration works.
+- Tell users they can optionally open the folder in Obsidian, activate memory or request `learn <topic>`/`learn this`. General knowledge uses managed memory; engineering candidates remain under `research/candidates/`. Capture and candidate publication require Git for merge inspection and POSIX directory/no-follow/hard-link/locking operations; unsupported writes fail explicitly. Setup/read-only tooling can be used separately. If setup interrupted a learn request, resume it once configuration and required write capabilities work.
 - This setup is per operating-system user and machine. It requires local filesystem tools; on a surface without those tools, explain that setup must run in a local Codex environment rather than inventing a vault path.

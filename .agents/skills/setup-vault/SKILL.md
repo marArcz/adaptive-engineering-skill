@@ -1,6 +1,6 @@
 ---
 name: setup-vault
-description: Set up Adaptive Engineering's local knowledge vault after plugin installation. Create a new vault, connect an existing vault, or check the current configuration when the user requests vault setup.
+description: Set up Adaptive Engineering's local memory and knowledge vault after plugin or standalone installation. Create a new vault, connect an existing vault, or check the current configuration when the user requests vault setup.
 ---
 
 # Set up the engineering vault

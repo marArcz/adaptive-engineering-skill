@@ -45,41 +45,13 @@ jobs:
         run: |
           mkdir -p dist
           archive="dist/adaptive-engineering-$RELEASE_TAG.zip"
-          git archive --format=zip --prefix="adaptive-engineering-$RELEASE_TAG/" \
-            --output="$archive" HEAD -- \
-            .agents/skills .agents/plugins .codex-plugin assets \
-            vault-template tests \
-            install.py init_vault.py configure.py AGENTS.example.md \
-            README.md SETUP-AND-ACCEPTANCE.md
+          python package_release.py build --tag "$RELEASE_TAG" --ref HEAD --output "$archive"
           echo "ARCHIVE=$archive" >> "$GITHUB_ENV"
           cd dist
           sha256sum "adaptive-engineering-$RELEASE_TAG.zip" > SHA256SUMS
 
       - name: Test extracted bundle
-        shell: bash
-        run: |
-          python - <<'PY'
-          import os
-          import subprocess
-          import sys
-          import tempfile
-          from pathlib import Path
-          from zipfile import ZipFile
-
-          with tempfile.TemporaryDirectory() as temporary:
-              root = Path(temporary)
-              with ZipFile(os.environ['ARCHIVE']) as archive:
-                  archive.extractall(root)
-              bundle = root / f"adaptive-engineering-{os.environ['RELEASE_TAG']}"
-              subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-v'],
-                             cwd=bundle, check=True)
-              project = root / 'project'
-              project.mkdir()
-              subprocess.run([sys.executable, str(bundle / 'install.py'), '--target', 'repo',
-                              '--repo', str(project), '--with-agents'], check=True)
-              subprocess.run([sys.executable, str(bundle / 'init_vault.py'),
-                              '--path', str(root / 'vault')], check=True)
-          PY
+        run: python package_release.py verify "$ARCHIVE"
 
       - name: Publish GitHub release
         env:
