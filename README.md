@@ -2,7 +2,9 @@
 
 An **implementable, stack-agnostic, project-first, cost-aware Agent Skill**. No sub-agent is bundled: single-agent Economy is the default.
 
-The personal-memory branch adds an [active-session memory workflow](.agents/skills/adaptive-engineering/references/memory-session.md): compact profile/working-style recall, selective capture, and natural-language remember, inspect, continue-project, correct, consolidate, forget and pause/resume interactions. Capture operates only while the skill is active and within the saved boundaries. There are no background hooks or automatic Git sync; fresh-agent and actual-device acceptance remain separate checks.
+The personal-memory branch adds an [active-session memory workflow](.agents/skills/adaptive-engineering/references/memory-session.md): compact profile/working-style recall, selective capture, and natural-language remember, inspect, continue-project, correct, consolidate, forget and pause/resume interactions. Capture operates only while the skill is active and within the saved boundaries. There are no background hooks or automatic Git sync. Synthetic fresh Codex sessions and offline clone simulation have reviewed evidence; actual-device acceptance remains deferred.
+
+Start with [setup and acceptance](SETUP-AND-ACCEPTANCE.md) and the [Notion user guide](https://www.notion.so/41758ec524458120875bf66547af99b2). The [Notion project home](https://www.notion.so/41558ec5244581ac8165d11fe45bbcbb) tracks progress; the [acceptance and SDD handoff](https://www.notion.so/41758ec5244581858a80e317ce9d0d6f) and [technical MVP handoff](docs/mvp-handoff.md) map the implementation, evidence and remaining gates. Full MVP acceptance is **Blocked** pending actual two-device execution and the outstanding host checks.
 
 Coding, debugging, refactoring, and review require the separate [code simplicity and evidence policy](.agents/skills/adaptive-engineering/references/code-simplicity.md): minimal changes, justified validation, reuse, and verified assumptions.
 

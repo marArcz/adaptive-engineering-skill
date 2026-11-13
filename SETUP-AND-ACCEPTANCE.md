@@ -1,5 +1,7 @@
 # Adaptive Engineering — Setup and acceptance checklist
 
+Use the [Notion user guide](https://www.notion.so/41758ec524458120875bf66547af99b2), [acceptance and SDD handoff](https://www.notion.so/41758ec5244581858a80e317ce9d0d6f) and [Notion project home](https://www.notion.so/41558ec5244581ac8165d11fe45bbcbb) for instructions, acceptance evidence and tracked progress. This checklist covers setup and developer checks; [MVP handoff](docs/mvp-handoff.md) records the evidence and remaining acceptance gates. T22 actual-device acceptance is deferred, so T23/full MVP acceptance remains **Blocked** even when local documentation and checks are ready.
+
 ## 0. Scope
 
 - One shared `.agents/skills/adaptive-engineering/SKILL.md` for Codex and Antigravity.
@@ -32,7 +34,7 @@ Open the folder in Obsidian (`Open folder as vault`). Initialize a private GitHu
 
 To connect an existing vault on each device, run `python3 configure.py --vault "<vault-folder>"` from the distribution (or `py configure.py --vault "<vault-folder>"` on Windows). Setup adds missing memory folders, a record template, and capture settings without replacing existing notes or settings. The vault location is saved in device-local configuration; `ENGINEERING_VAULT_PATH` overrides it when set. The portable `memory/capture-settings.json` travels with the vault and contains no device location.
 
-Use `python3 configure.py --show-capture` to inspect the effective vault's policy and `python3 configure.py --capture paused` or `--capture active` to change its mode. The default boundaries exclude temporary material, secrets, third-party private data, and project filesystem paths; sensitive personal details require an explicit request. Inferences remain tentative. The core skill now invokes validated memory operations selectively during active sessions; it does not install background capture. See the bundled memory-session guide for read-only activation, verified pause/resume, natural-language routing and failure reporting. Classification quality still needs fresh live-agent validation.
+Use `python3 configure.py --show-capture` to inspect the effective vault's policy. During an active session, request “pause remembering” or “resume remembering”; the [session workflow](.agents/skills/adaptive-engineering/references/memory-session.md) verifies the saved mode with `memory_session.py`. `configure.py --capture paused` or `--capture active` is a separate setup control. The default boundaries exclude temporary material, secrets, third-party private data, and project filesystem paths; sensitive personal details require an explicit request. Inferences remain tentative. The core skill invokes validated memory operations selectively during active sessions; it does not install background capture. [Synthetic fresh Codex observations](docs/live-agent-evaluation-v1.md) cover classification within their recorded scope; Antigravity and actual devices remain untested.
 
 ## 2. Install skill in a real project
 
