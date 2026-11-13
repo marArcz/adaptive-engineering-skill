@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "fixture_version": 1,
+  "source_spec": "https://www.notion.so/41558ec5244581fab0a0d560711a1f21",
+  "checks": [
+    {
+      "id": "A01",
+      "requirements": [
+        "R01",
+        "R03",
+        "R04"
+      ],
+      "scope": "Fresh Python interpreter reconstructs bounded profile, tentative traits and scoped project decisions.",
+      "tests": [
+        "test_memory_acceptance.AcceptanceTests.test_fresh_process_recall_keeps_identity_profile_and_project_scopes",
+        "test_memory_session.SessionTests.test_activation_is_read_only_general_bounded_and_not_a_save_claim",
+        "test_memory_context.ContextTests.test_standalone_cli_output_is_budgeted_text"
+      ],
+      "follow_up": "T20/T22: fresh agent interpretation and actual cross-device session."
+    },
+    {
+      "id": "A02",
+      "requirements": [
+        "R02"
+      ],
+      "scope": "Caller-classified exclusions, capture gates and explicit sensitive-request rules.",
+      "tests": [
+        "test_memory_capture.CaptureTests.test_every_policy_row",
+        "test_memory_capture.CaptureTests.test_required_exclusions_and_untrusted_origins",
+        "test_memory_capture.CaptureTests.test_sensitive_requires_trusted_direct_request",
+        "test_memory_learning.LearningTests.test_authority_and_privacy_boundaries_do_not_write_or_echo_payload"
+      ],
+      "follow_up": "T20: agent correctly classifies natural-language material."
+    },
+    {
+      "id": "A03",
+      "requirements": [
+        "R02",
+        "R03"
+      ],
+      "scope": "Empty summaries, inference remains tentative and independent evidence required.",
+      "tests": [
+        "test_memory_capture.CaptureTests.test_required_exclusions_and_untrusted_origins",
+        "test_memory_capture.CaptureTests.test_repeat_updates_evidence_without_promoting_inference",
+        "test_memory_summaries.SummaryTests.test_empty_separate_views_and_no_persisted_summary",
+        "test_memory_summaries.SummaryTests.test_single_mistake_and_retold_feedback_are_not_traits",
+        "test_memory_summaries.SummaryTests.test_independent_feedback_infers_tentatively_without_promotion"
+      ],
+      "follow_up": "T20: hypothetical text and inferred traits handled correctly by the agent."
+    },
+    {
+      "id": "A04",
+      "requirements": [
+        "R03",
+        "R07"
+      ],
+      "scope": "Explicit significance, provenance, related records and duplicate episode retries.",
+      "tests": [
+        "test_memory_journal.JournalTests.test_event_fields_provenance_and_related_decision",
+        "test_memory_journal.JournalTests.test_significance_routine_and_invented_event_exclusion",
+        "test_memory_journal.JournalTests.test_repetition_evidence_and_changed_account_keep_identity"
+      ],
+      "follow_up": "T20: useful event selection and factual prose in real conversations."
+    },
+    {
+      "id": "A05",
+      "requirements": [
+        "R04"
+      ],
+      "scope": "Five-excerpt and 12000-character budgets, scope isolation and exact boundaries.",
+      "tests": [
+        "test_memory_context.ContextTests.test_exact_budget_and_below_boundary",
+        "test_memory_context.ContextTests.test_total_budget_five_excerpts_and_single_snapshot",
+        "test_memory_context.ContextTests.test_project_isolation_and_inspectable_profile",
+        "test_memory_context.ContextTests.test_exact_excerpt_boundary_unicode_and_missing_links"
+      ],
+      "follow_up": "T20: relevance and wording of agent recall."
+    },
+    {
+      "id": "A06",
+      "requirements": [
+        "R05"
+      ],
+      "scope": "Portable identity survives two workspace locations; new content cannot persist local paths.",
+      "tests": [
+        "test_project_identity.ProjectIdentityTests.test_two_checkouts_match_without_persisting_locations",
+        "test_memory_operations.OperationTests.test_project_isolation_and_runtime_checkouts",
+        "test_memory_boundary.MemoryBoundaryTests.test_paths_in_every_position",
+        "test_memory_learning.LearningTests.test_paths_are_rejected_in_all_new_learning_content"
+      ],
+      "follow_up": "T21: independent clones; T22: actual devices."
+    },
+    {
+      "id": "A07",
+      "requirements": [
+        "R05"
+      ],
+      "scope": "Same-name identities and conflicting repository identities remain ambiguous.",
+      "tests": [
+        "test_project_identity.ProjectIdentityTests.test_remoteless_rename_and_collisions",
+        "test_project_identity.ProjectIdentityTests.test_remote_collision_and_explicit_conflict",
+        "test_memory_operations.OperationTests.test_project_identity_retry_and_ambiguous_names"
+      ],
+      "follow_up": "T20: focused clarification rather than choosing a project silently."
+    },
+    {
+      "id": "A08",
+      "requirements": [
+        "R06"
+      ],
+      "scope": "Correction refreshes current views, retains history and preserves stale or unresolved edits.",
+      "tests": [
+        "test_memory_corrections.CorrectionTests.test_clear_correction_updates_all_current_views_and_history",
+        "test_memory_corrections.CorrectionTests.test_ambiguous_contradiction_stays_unresolved_until_explicit_choice",
+        "test_memory_corrections.CorrectionTests.test_manual_edit_during_publication_preserved_as_semantic_conflict",
+        "test_memory_store.StoreTests.test_external_edit_during_publication_and_resolution",
+        "test_memory_acceptance.AcceptanceTests.test_consolidate_correct_and_forget_refresh_every_view_and_keep_legacy",
+        "test_memory_store.StoreTests.test_create_update_retries_and_stale_tokens"
+      ],
+      "follow_up": "T20: natural-language contradiction recognition and clarification."
+    },
+    {
+      "id": "A09",
+      "requirements": [
+        "R07"
+      ],
+      "scope": "Exact duplicate consolidation is repeatable; distinct outcomes and meaningful old episodes survive.",
+      "tests": [
+        "test_memory_consolidation.ConsolidationTests.test_true_duplicates_preserve_sources_files_and_idempotence",
+        "test_memory_consolidation.ConsolidationTests.test_keywords_different_outcomes_and_mixed_basis_not_merged",
+        "test_memory_consolidation.ConsolidationTests.test_old_experiences_and_inferred_relationships_survive",
+        "test_memory_acceptance.AcceptanceTests.test_consolidate_correct_and_forget_refresh_every_view_and_keep_legacy"
+      ],
+      "follow_up": "T20: semantic distinctness beyond exact deterministic matching."
+    },
+    {
+      "id": "A10",
+      "requirements": [
+        "R08"
+      ],
+      "scope": "Managed lineage and derived closure removed; interrupted cleanup suppressed and retriable.",
+      "tests": [
+        "test_memory_forgetting.ForgettingTests.test_remove_all_revisions_base_and_conflict_branches",
+        "test_memory_forgetting.ForgettingTests.test_derived_records_and_views_are_cleaned_transitively",
+        "test_memory_forgetting.ForgettingTests.test_aliases_and_correction_history_are_removed_together",
+        "test_memory_forgetting.ForgettingTests.test_interrupted_cleanup_suppresses_whole_batch_and_resumes",
+        "test_memory_forgetting.ForgettingTests.test_known_ids_and_imported_dependencies_cannot_resurface",
+        "test_memory_acceptance.AcceptanceTests.test_consolidate_correct_and_forget_refresh_every_view_and_keep_legacy"
+      ],
+      "follow_up": "T21/T22: propagation after manual sync. Git history and backups are outside active deletion."
+    },
+    {
+      "id": "A11",
+      "requirements": [
+        "R01",
+        "R05",
+        "R09"
+      ],
+      "scope": "No actual two-device acceptance is performed by this deterministic suite.",
+      "tests": [],
+      "follow_up": "T22: actual two-device manual Git sync and a fresh active skill session. T21 clone simulation is supporting evidence only."
+    },
+    {
+      "id": "A12",
+      "requirements": [
+        "R06",
+        "R09"
+      ],
+      "scope": "Real local Git conflict gates capture; conflicted notes excluded; semantic conflicts survive clean merges.",
+      "tests": [
+        "test_vault_guard.VaultGuardTests.test_real_conflict_and_resolution",
+        "test_vault_guard.VaultGuardTests.test_search_excludes_markers_beyond_excerpt",
+        "test_memory_corrections.CorrectionTests.test_clean_git_merge_does_not_resolve_semantic_conflicts_by_timestamp",
+        "test_memory_acceptance.AcceptanceTests.test_real_merge_gate_blocks_capture_and_keeps_unrelated_recall"
+      ],
+      "follow_up": "T21: independent clones and both merge orders; T20: agent explains unresolved meaning."
+    },
+    {
+      "id": "A13",
+      "requirements": [
+        "R10"
+      ],
+      "scope": "Legacy bytes and reviewed metadata preserved through setup, learning, lifecycle and extracted installs.",
+      "tests": [
+        "test_memory_setup.MemorySetupTests.test_existing_vault_is_additive_and_repeatable",
+        "test_memory_contract.ContractTests.test_legacy_search_preserves_bytes_and_status",
+        "test_memory_learning.LearningTests.test_legacy_notes_and_reviewed_catalog_are_byte_preserved",
+        "test_distribution.DistributionTests.test_extracted_marketplace_and_all_standalone_setups_are_self_contained",
+        "test_memory_acceptance.AcceptanceTests.test_legacy_snapshot_survives_setup_learning_and_managed_forgetting"
+      ],
+      "follow_up": "T20/T22: engineering workflow in live host sessions."
+    },
+    {
+      "id": "A14",
+      "requirements": [
+        "R01",
+        "R02",
+        "R06"
+      ],
+      "scope": "Missing or unavailable vaults, unsafe paths and partial publication cannot produce save claims; source instructions cannot grant capture permission.",
+      "tests": [
+        "test_memory_capture.CaptureTests.test_required_exclusions_and_untrusted_origins",
+        "test_memory_learning.LearningTests.test_authority_and_privacy_boundaries_do_not_write_or_echo_payload",
+        "test_memory_setup.MemorySetupTests.test_invalid_config_file_target_and_failed_write",
+        "test_memory_store.StoreTests.test_failed_publish_and_uncertain_readback",
+        "test_memory_store.StoreTests.test_flush_failure_before_publication",
+        "test_memory_forgetting.ForgettingTests.test_failed_marker_publication_and_uncertain_readback",
+        "test_memory_forgetting.ForgettingTests.test_intervening_edit_is_preserved_and_requires_replanning",
+        "test_memory_forgetting.ForgettingTests.test_post_cleanup_verification_failure_is_partial",
+        "test_memory_learning.LearningTests.test_failed_or_uncertain_publication_has_no_success_and_keeps_pointer",
+        "test_memory_session.SessionTests.test_mode_failures_busy_and_unsafe_settings_have_no_success_claim",
+        "test_memory_contract.ContractTests.test_invalid_records",
+        "test_memory_contract.ContractTests.test_invalid_collection_and_markers",
+        "test_memory_store.StoreTests.test_invalid_graphs_versions_and_duplicate_base",
+        "test_memory_store.StoreTests.test_boundary_merge_gate_and_symlinks",
+        "test_memory_session.SessionTests.test_empty_missing_and_unconfigured_vaults_do_not_invent_or_initialize",
+        "test_memory_capture.CaptureTests.test_path_gate_failures_and_uncertain_results",
+        "test_memory_capture.CaptureTests.test_concurrent_capture_retries_without_duplicate_creation"
+      ],
+      "follow_up": "T20: agent treats recalled source as data and explains failures accurately. Permission failures include fault injection."
+    }
+  ]
+}

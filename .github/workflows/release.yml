@@ -37,8 +37,8 @@ jobs:
             exit 1
           fi
 
-      - name: Run tests
-        run: python -m unittest discover -s tests -v
+      - name: Run deterministic acceptance checks
+        run: python run_acceptance.py --output dist/acceptance-source.json
 
       - name: Package release
         shell: bash
@@ -63,6 +63,6 @@ jobs:
           if [[ "$RELEASE_TAG" == *-* ]]; then
             flags+=(--prerelease)
           fi
-          gh release create "$RELEASE_TAG" "$ARCHIVE" dist/SHA256SUMS \
+          gh release create "$RELEASE_TAG" "$ARCHIVE" dist/SHA256SUMS dist/acceptance-source.json \
             --verify-tag --title "Adaptive Engineering $RELEASE_TAG" \
             --generate-notes "${flags[@]}"

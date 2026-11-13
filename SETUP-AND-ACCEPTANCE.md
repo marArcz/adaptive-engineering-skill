@@ -62,6 +62,12 @@ python3 -m unittest discover -s tests -v
 # Or: py -m unittest discover -s tests -v
 ```
 
+For acceptance evidence with exact test IDs and fixture hashes, run `python3 run_acceptance.py
+--output /tmp/acceptance-v1.json --markdown /tmp/acceptance-v1.md` using unused report paths.
+See [Deterministic acceptance v1](docs/deterministic-acceptance-v1.md) for the requirement mapping
+and remaining live-agent, clone and actual-device checks. The report never treats automated
+coverage as full product acceptance. Extracted-bundle verification also checks this mapping.
+
 After installing skill to an existing project:
 
 ```bash

@@ -10,6 +10,7 @@ RUNTIME_MODULES = (
 SETUP_SCRIPTS = ('init_vault.py', 'configure.py')
 IGNORE_PATTERNS = ('__pycache__', '*.pyc', '*.pyo', '.DS_Store', '.env', '.env.*', '.envrc', '.git')
 BUNDLE_FILES = (*RUNTIME_MODULES, *SETUP_SCRIPTS, 'install.py', 'distribution.py',
-                'package_release.py', 'AGENTS.example.md', 'README.md', 'SETUP-AND-ACCEPTANCE.md')
+                'package_release.py', 'run_acceptance.py', 'AGENTS.example.md', 'README.md',
+                'SETUP-AND-ACCEPTANCE.md')
 BUNDLE_TREES = ('.agents/skills', '.agents/plugins', '.codex-plugin', 'assets',
                 'vault-template', 'docs', 'tests')

@@ -113,7 +113,7 @@ def verify_bundle(archive_path, *, run_tests=True):
         env.pop('PYTHONPATH', None)
         env.pop('ENGINEERING_VAULT_PATH', None)
         if run_tests:
-            subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-q'],
+            subprocess.run([sys.executable, 'run_acceptance.py'],
                            cwd=bundle, env=env, check=True)
         manifest = json.loads((bundle / '.codex-plugin/plugin.json').read_text())
         marketplace = json.loads((bundle / '.agents/plugins/marketplace.json').read_text())

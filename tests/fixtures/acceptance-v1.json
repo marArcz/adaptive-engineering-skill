@@ -1,0 +1,24 @@
+{
+  "fixture_version": 1,
+  "preference": {
+    "subject": "Reply detail",
+    "original": "The user generally wants brief explanations.",
+    "corrected": "The user now generally wants detailed explanations.",
+    "source": "Synthetic acceptance conversation: direct preference"
+  },
+  "feedback": [
+    {"subject": "Planning feedback", "happened": "Focused questions clarified a release plan.", "source": "Synthetic acceptance planning episode"},
+    {"subject": "Review feedback", "happened": "Focused questions clarified a review decision.", "source": "Synthetic acceptance review episode"}
+  ],
+  "lesson": "Focused questions may help collaboration.",
+  "projects": [
+    {"name": "Acceptance project", "repository": "https://example.org/acceptance/first", "decision": "Ship the smaller release."},
+    {"name": "Other acceptance project", "repository": "https://example.org/acceptance/second", "decision": "Keep the broader release scope."}
+  ],
+  "old_experience": {
+    "id": "00000000-0000-4000-8000-000000000090",
+    "title": "Experience: distinct old outcome",
+    "body": "An old synthetic collaboration produced a useful outcome.",
+    "timestamp": "1990-01-01T00:00:00Z"
+  }
+}
