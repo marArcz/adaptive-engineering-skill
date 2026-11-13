@@ -68,6 +68,11 @@ See [Deterministic acceptance v1](docs/deterministic-acceptance-v1.md) for the r
 and remaining live-agent, clone and actual-device checks. The report never treats automated
 coverage as full product acceptance. Extracted-bundle verification also checks this mapping.
 
+For T22/A11, use the [two-device acceptance procedure](docs/two-device-acceptance.md) and its
+[blank versioned evidence template](tests/fixtures/two-device-evidence-v1.json). This is preparation
+only: actual second-device execution is deferred and T22 remains Blocked. Local clones, fixtures
+and a checklist do not establish device acceptance.
+
 After installing skill to an existing project:
 
 ```bash

@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "procedure": "docs/two-device-acceptance.md",
+  "task": "T22/A11",
+  "task_state": "Blocked",
+  "deferred_reason": "Actual second-device execution deferred by the user; preparation only.",
+  "allowed_outcomes": ["pass", "fail", "not_run"],
+  "overall_outcome": "not_run",
+  "run_id": null,
+  "started_at_utc": null,
+  "operator_attests_two_actual_machines": null,
+  "build": {
+    "source_ref": null,
+    "archive_sha256": null,
+    "prior_validation_evidence": []
+  },
+  "devices": [
+    {
+      "label": "A",
+      "os_family_version": null,
+      "python_version": null,
+      "git_version": null,
+      "host_application_version": null,
+      "archive_sha256": null,
+      "loaded_helper_provenance_evidence": [],
+      "exposed_model": null,
+      "exposed_effort": null,
+      "runtime_limitations": []
+    },
+    {
+      "label": "B",
+      "os_family_version": null,
+      "python_version": null,
+      "git_version": null,
+      "host_application_version": null,
+      "archive_sha256": null,
+      "loaded_helper_provenance_evidence": [],
+      "exposed_model": null,
+      "exposed_effort": null,
+      "runtime_limitations": []
+    }
+  ],
+  "portable_project_id": null,
+  "record_ids": {},
+  "sync_rounds": [],
+  "sync_round_fields": ["sender_label", "receiver_label", "sender_commit", "receiver_commit", "outcome", "evidence"],
+  "checks": [
+    {"id": "environment", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "portable_config", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "capture_a", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "manual_sync", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "fresh_recall_b", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "correction", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "forgetting", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "semantic_divergence", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "text_conflict", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "capture_pause", "outcome": "not_run", "observations": null, "evidence": []},
+    {"id": "recovery_limits", "outcome": "not_run", "observations": null, "evidence": []}
+  ],
+  "stops_or_failures": [],
+  "remaining_limitations": [],
+  "reviewed_at_utc": null,
+  "review_evidence": []
+}
