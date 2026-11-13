@@ -2,7 +2,7 @@
 
 Use a disposable synthetic vault, never the personal vault. Activate this skill against that explicit destination. These are natural-language prompts for the agent, not CLI commands. Observe actual helper calls, file changes and responses. Record model/session, results, truncation and failures in T20. Reset the fixture for destructive/error cases. For life-context prompts, do not inspect an unrelated code repository.
 
-T16's `tests/test_memory_session.py` runs structured helper integration for these routes, including isolated installed CLI execution. It does not certify an agent's interpretation, privacy classification or instruction-following. The fresh-session scenarios below remain to be run in T20, separately from T21 clone simulation and T22 actual devices.
+T16's `tests/test_memory_session.py` runs structured helper integration for these routes, including isolated installed CLI execution. It does not certify an agent's interpretation, privacy classification or instruction-following. T20's developer-only `run_live_eval.py` uses versioned direct prompts in `tests/fixtures/live-agent-v1.json`; see `docs/live-agent-evaluation-v1.md` in the source distribution for preparation, raw evidence and manual reporting. Process completion never automatically passes a behavioral case. Host observations remain separate from T21 clone simulation and T22 actual devices.
 
 | Prompt / fixture | Expected operation and observable behavior |
 | --- | --- |

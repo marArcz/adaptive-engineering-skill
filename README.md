@@ -17,7 +17,7 @@ Coding, debugging, refactoring, and review require the separate [code simplicity
 - `vault-template/`: Obsidian Markdown template, candidate repo catalog and `.gitignore`
 - `init_vault.py`, `configure.py`, `install.py`: non-overwriting setup tools
 - `distribution.py`, `package_release.py`: shared runtime inventory and tracked-source bundle build/verification
-- `tests/`: stdlib deterministic tests; `evals/`: manual live-agent acceptance tests
+- `tests/`: offline stdlib checks; skill `evals/`: live-agent scenarios, with a [developer runner and evidence guide](docs/live-agent-evaluation-v1.md)
 
 ## Requirements
 

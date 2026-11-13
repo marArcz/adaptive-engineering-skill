@@ -80,11 +80,13 @@ reproducible under privileged test users; this is not a claim about a physically
 The evidence-report tests inject failures and skips into tiny independent suites to verify that
 the report cannot turn those outcomes into passing acceptance evidence.
 
-## Remaining acceptance
+## Beyond deterministic evidence
 
 - **T20:** fresh-agent classification, hypothetical/inferred wording, source-as-data handling,
   relevance, selective journaling, semantic corrections and clarification, and legacy engineering
-  behavior in an active host. A new Python process does not establish these behaviors.
+  behavior in an active host. See the [versioned live-agent evaluation](live-agent-evaluation-v1.md)
+  for direct prompts, recorded host observations and gaps. A new Python process does not establish
+  these behaviors.
 - **T21:** independent local clones, sync/merge ordering and deletion propagation. Conflicting
   branches in one temporary repository do not establish all clone behavior.
 - **T22/A11:** actual two-device manual sync, different device-local vault/workspace paths and a
